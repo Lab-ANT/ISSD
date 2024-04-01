@@ -1,0 +1,11 @@
+__pycache__
+data/
+data-temp/
+*.png
+*.npy
+*.pdf
+*.o
+*.out
+output/
+output-backup/
+data-backup/

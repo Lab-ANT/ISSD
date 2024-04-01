@@ -1,0 +1,15 @@
+http://mocap.cs.cmu.edu:80/subjects/86/86_01.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_02.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_03.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_04.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_05.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_06.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_07.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_08.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_09.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_10.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_11.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_12.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_13.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_14.amc
+http://mocap.cs.cmu.edu:80/subjects/86/86_15.amc

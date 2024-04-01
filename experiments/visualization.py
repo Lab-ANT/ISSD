@@ -1,0 +1,55 @@
+"""
+Created by Chengyu on 2024/1/28.
+This is a case study of ISSD and baselines on the MoCap dataset,
+which intuitively shows the selection results of each method.
+The output figure is saved in output/case-studies/
+"""
+
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+import tqdm
+import sys
+sys.path.append('.')
+from miniutils import compact, reorder_label
+
+methods = ['raw', 'issd', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap']
+method_labels = ['Raw', 'ISSD', 'LDA', 'SFM', 'ECP', 'ECS', 'PCA', 'UMAP']
+dataset = ['Synthetic', 'MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD']
+dataset = ['SynSeg']
+
+for d in dataset:
+    fname_list = os.listdir(f'data/{d}/raw/')
+    for fname in fname_list:
+        # if not os.path.exists(f'output/selection/{d}_{m}.txt'):
+        #     print(f'output/selection/{d}_{m}.txt does not exists, passed')
+        #     continue
+        os.makedirs(f'output/case-studies/{d}', exist_ok=True)
+        plt.style.use('classic')
+        plt.rcParams['pdf.fonttype'] = 42
+        fig, ax = plt.subplots(nrows=len(methods), figsize=(5,len(methods)*0.85))
+        for m in methods:
+            if not os.path.exists(f'data/{d}/{m}/{fname}'):
+                    continue
+            data = np.load(f'data/{d}/{m}/{fname}', allow_pickle=True)
+            label = data[:,-1]
+            data = data[:,:-1]
+            label = reorder_label(label)
+            data = StandardScaler().fit_transform(data)
+            data = (data - np.min(data)) / (np.max(data) - np.min(data))
+            ax[methods.index(m)].plot(data, lw=1)
+            label = np.vstack([label, label])
+            # ax[methods.index(m)].imshow(label, cmap='tab20', aspect='auto', alpha=0.4, interpolation='nearest')
+            ax[methods.index(m)].imshow(label, cmap='tab20', aspect='auto', alpha=0.4)
+            length = data.shape[0]
+            ax[methods.index(m)].set_xlim(0, length)
+            ax[methods.index(m)].set_yticks([])
+            for tick in ax[methods.index(m)].xaxis.get_major_ticks():
+                # tick.label.set_fontsize(6)
+                tick.label1.set_fontsize(10)
+            ax[methods.index(m)].set_ylim(0, 1)
+            ax[methods.index(m)].set_ylabel(method_labels[methods.index(m)])
+        plt.tight_layout()
+        plt.savefig(f'output/case-studies/{d}/{fname[:-4]}.png')
+        plt.close()
