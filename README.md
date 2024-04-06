@@ -41,7 +41,7 @@ python experiments/inte.py
 ## Run Downstream Methods
 **Convert to downstream environment**
 
-Time2State, E2USD, TICC, ClaSP, GHMM:
+Time2State, E2USD, TICC:
 ```bash
 python experiments/run_dmethods.py [e.g.,time2state] [e.g., MoCap] [e.g., issd]
 ```
