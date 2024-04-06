@@ -1,7 +1,8 @@
 This is the repository for the paper entitled "ISSD: Indicator Selection for Time Series State Detection"
 
 # Usage
-If you only want to use ISSD or IRSD, please refer to ```usage_example.py```, which contains detailed examples of ISSD and IRSD.
+If you only want to use ISSD, please refer to ```usage_example.py```, which contains detailed examples of ISSD.  
+Note that the master branch is mainly for the reproducibility, A lite version of ISSD will soon be available at the lite branch。
 
 # Reproducibility
 To reproduce the results reported in the paper, please refer to the following guideline.
@@ -32,6 +33,10 @@ ISSD, SFS, ECP, ECS:
 ```bash
 python experiments/selection.py [e.g., MoCap] [e.g., issd-qf] [dim, e.g., 4]
 ```
+To use issd, you must run issd-qf and issd-cf on all datasets in advance, and then run
+```bash
+python experiments/inte.py
+```
 
 ## Run Downstream Methods
 **Convert to downstream environment**
@@ -42,7 +47,7 @@ python experiments/run_dmethods.py [e.g.,time2state] [e.g., MoCap] [e.g., issd]
 ```
 
 AutoPlait is special, which uses c implementation:  
-In root folder, sequentially run
+In root folder, run
 
 ```bash
 python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py
@@ -58,11 +63,14 @@ In root folder
 python downstream_methods/AutoPlait/experiments/redirect_results.py
 ```
 
+Automatic scripts for running all downstream methods are placed in the ```scripts``` folder
 ## Results
+To obtain the results, please run
 ```bash
-python experiments/summary.py
-python paper_figure/plot_overall_performance.py
+python experiments/summary.py [ari|nmi|purity]
+python paper_figure/plot_overall_performance.py [ari|nmi|purity]
 ```
+The summarized txt files, figures will be saved in the output folder
 
 ## Visualization of Results
 ```bash
