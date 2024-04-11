@@ -11,7 +11,6 @@ warnings.filterwarnings("ignore")
 import os
 
 datasets = ['MoCap', 'ActRecTut', 'USC-HAD', 'PAMAP2', 'SynSeg']
-datasets = ['SynSeg']
 
 for dataset in datasets:
     print(dataset)

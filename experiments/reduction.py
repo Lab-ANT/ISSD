@@ -15,7 +15,6 @@ script_path = os.path.dirname(__file__)
 n_components = 4
 dataset_list = ['MoCap', 'SynSeg', 'PAMAP2', 'ActRecTut', 'USC-HAD']
 methods = ['human', 'pca', 'umap']
-dataset_list = ['SynSeg']
 
 def human(dataset):
     if dataset == 'MoCap':
