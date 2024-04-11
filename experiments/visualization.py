@@ -17,7 +17,6 @@ from miniutils import compact, reorder_label
 methods = ['raw', 'issd', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap']
 method_labels = ['Raw', 'ISSD', 'LDA', 'SFM', 'ECP', 'ECS', 'PCA', 'UMAP']
 dataset = ['Synthetic', 'MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD']
-dataset = ['SynSeg']
 
 for d in dataset:
     fname_list = os.listdir(f'data/{d}/raw/')
