@@ -1,13 +1,16 @@
-This is the repository for the paper entitled "ISSD: Indicator Selection for Time Series State Detection"
+# Note
+This is the repository for the paper entitled "ISSD: Indicator Selection for Time Series State Detection".
+
+If you encounter any problems, please contact chengyu@nudt.edu.cn or raise an issue.
 
 # Usage
 If you only want to use ISSD, please refer to ```usage_example.py```, which contains detailed examples of ISSD.  
-Note that the master branch is mainly for the reproducibility, A lite version of ISSD will soon be available at the lite branch。
+Note that the master branch is mainly for the reproducibility, A lite version of ISSD will soon be available at the lite branch.
 
 # Reproducibility
 To reproduce the results reported in the paper, please refer to the following guideline.
 ## Datasets
-download all datasets and place the them in ```data/raw```
+download all datasets and place them in ```data/raw```
 
 ```bash
 python datautils/convert_data_format.py
@@ -29,10 +32,14 @@ python experiments/reduction.py
 ```
 
 **Convert to the selection environment**  
-ISSD, SFS, ECP, ECS:
 ```bash
 python experiments/selection.py [e.g., MoCap] [e.g., issd-qf] [dim, e.g., 4]
 ```
+The above command takes 3 positional args:  
+Datasets: ```[MoCap|SynSeg|USC-HAD|SynSeg|PAMAP2]```  
+Downstream methods: ```[issd-qf|issd-cf|sfm|ecp|ecs]```  
+Desired #channels: ```e.g., 4```
+
 To use issd, you must run issd-qf and issd-cf on all datasets in advance, and then run
 ```bash
 python experiments/inte.py
@@ -55,7 +62,7 @@ python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py
 
 In downstream_methods/AutoPlait folder
 ```bash
-bash experiments runAutoPlait.sh [dataset] [pca|umap|human|raw]
+bash experiments runAutoPlait.sh [e.g.,MoCap] [e.g., pca]
 ```
 
 In root folder
@@ -76,4 +83,4 @@ The summarized txt files, figures will be saved in the output folder
 ```bash
 python experiments/visualization.py
 ```
-The summary is saved in output/
+The visulalization results will be saved in output/case-studies/
