@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import math
-from sklearn.neighbors import KDTree
-from sklearn.metrics import accuracy_score
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KDTree, BallTree
+# from sklearn.metrics import accuracy_score
+# from sklearn.neighbors import KNeighborsClassifier
 
 def reorder_label(label):
     # Start from 0.
@@ -622,12 +622,13 @@ def sample_subseries(X, n, k):
     segments = [X[sp:sp+k] for sp in start_points]
     return segments
 
-def nn_test(sample1, sample2, n, k):
+def nn_test(sample1, sample2, n, k, nnmethod='ball'):
     """
     sample1: time series sample
     sample2: time series sample
     n: num of subseries
     k: length of subseries
+    nnmethod: nearest neighbor query method, 'ball' or 'kd'
     """
     A1 = sample_subseries(sample1, n, k)
     A2 = sample_subseries(sample2, n, k)
@@ -637,8 +638,11 @@ def nn_test(sample1, sample2, n, k):
     r = int(math.log(p))
     A = A1 + A2
     T_rp = 0
-    # construct KDTree
-    tree = KDTree(A, metric='euclidean', leaf_size=10)
+    # construct KDTree or BallTree
+    if nnmethod == 'kd':
+        tree = KDTree(A, metric='euclidean', leaf_size=10)
+    else: # use BallTree by default
+        tree = BallTree(A, metric='euclidean', leaf_size=10)
     for i in range(p):
         dist, idx = tree.query(A[i].reshape(1,-1), k=r+1)
         idx = idx[0]
