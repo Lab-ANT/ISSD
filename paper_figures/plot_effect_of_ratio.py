@@ -11,7 +11,7 @@ for method in ['time2state', 'e2usd', 'ticc', 'autoplait']:
         for i in range(1,11):
             nmi_list = []
             for j in range(1,6):
-                result = np.load(f'output/results/case_study/{method}/case{i}-{j}.npy')
+                result = np.load(f'output/sensitivity/{method}/case{i}-{j}.npy')
                 nmi = normalized_mutual_info_score(result[0], result[1])
                 nmi_list.append(nmi)
             nmi_list_per_case.append(np.mean(nmi_list))
@@ -19,7 +19,7 @@ for method in ['time2state', 'e2usd', 'ticc', 'autoplait']:
     if method in ['ticc', 'autoplait']:
         nmi_list_per_case = []
         for i in range(1,11):
-            result = np.load(f'output/results/case_study/{method}/case{i}.npy')
+            result = np.load(f'output/sensitivity/{method}/case{i}.npy')
             nmi = normalized_mutual_info_score(result[0], result[1])
             nmi_list_per_case.append(nmi)
         nmi_list_per_method.append(nmi_list_per_case)
@@ -27,7 +27,8 @@ print(nmi_list_per_method[0])
 
 plt.style.use('classic')
 plt.rcParams['pdf.fonttype'] = 42
-plt.figure(figsize=(4.5,4))
+# plt.figure(figsize=(4.5,4))
+plt.figure(figsize=(8,4))
 plt.plot(nmi_list_per_method[0], label='Time2State', marker='D', lw=3, markersize=8)
 plt.plot(nmi_list_per_method[1], label='E2USD', marker='s', lw=3, markersize=8)
 plt.plot(nmi_list_per_method[2], label='TICC', marker='o', lw=3, markersize=8)

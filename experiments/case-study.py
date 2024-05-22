@@ -20,8 +20,8 @@ for i in range(1,11):
     # case study data is only one for each ratio.
     # run them 5 times to get the average performance.
     # autoplait and ticc does not need to run 5 times.
-    # because they are nearly deterministic.
-    os.makedirs(f'output/results/case_study/{method}/', exist_ok=True)
+    # because they are deterministic.
+    os.makedirs(f'output/sensitivity/{method}/', exist_ok=True)
     if method in ['time2state', 'e2usd']:
         for j in range(1,6):
             data, state_seq = load_data(f'data/CaseStudy/case{i}.npy')
@@ -36,7 +36,7 @@ for i in range(1,11):
             state_seq = state_seq[:min_len]
             nmi = normalized_mutual_info_score(state_seq, prediction)
             print(method, nmi)
-            np.save(f'output/results/case_study/{method}/case{i}-{j}.npy', np.vstack((prediction, state_seq)))
+            np.save(f'output/sensitivity/{method}/case{i}-{j}.npy', np.vstack((prediction, state_seq)))
     elif method == 'ticc':
         data, state_seq = load_data(f'data/CaseStudy/case{i}.npy')
         print(i, data.shape)
@@ -50,7 +50,7 @@ for i in range(1,11):
         state_seq = state_seq[:min_len]
         nmi = normalized_mutual_info_score(state_seq, prediction)
         print(method, nmi)
-        np.save(f'output/results/case_study/{method}/case{i}.npy', np.vstack((prediction, state_seq)))
+        np.save(f'output/sensitivity/{method}/case{i}.npy', np.vstack((prediction, state_seq)))
 
 # VISUALIZE THE CASE STUDY DATA
 # results are saved in output/plots
