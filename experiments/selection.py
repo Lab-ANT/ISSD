@@ -25,6 +25,9 @@ from baselines.ChannelSelectionMTSC.src.elbow import elbow # ECS
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectFromModel
+# umap and pca
+import umap
+from sklearn.decomposition import PCA
 # surpress warnings
 import warnings
 warnings.filterwarnings("ignore")
@@ -48,7 +51,7 @@ os.makedirs(selection_output_path, exist_ok=True)
 
 if dataset not in ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']:
     raise ValueError(f'Unsupported dataset: {dataset}, the dataset should be [MoCap|SynSeg|ActRecTut|PAMAP2|USC-HAD]')
-if method not in ['issd-qf', 'issd-cf', 'sfs', 'ecs', 'ecp', 'lda', 'sfm']:
+if method not in ['issd-qf', 'issd-cf', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
     raise ValueError(f'Unsupported method: {method}, to use pca/umap/human, please use reduction.py')
 
 fname_list = os.listdir(raw_data_path)
@@ -170,4 +173,18 @@ elif method in ['lda', 'ecp', 'ecs', 'sfm']:
             print(result)
             data_reduced = test_data[:,result]
             data_reduced = np.vstack((data_reduced.T, test_label)).T
+        np.save(os.path.join(f'data/{dataset}/{method}', fname), data_reduced)
+
+# reduction methods
+elif method in ['pca', 'umap']:
+    for fname in tqdm.tqdm(fname_list):
+        data = np.load(os.path.join(raw_data_path, fname), allow_pickle=True)
+        data_raw = data[:,:-1]
+        label = data[:,-1]
+        if method == 'pca':
+            data_reduced = PCA(n_components=n_components).fit_transform(data_raw)
+            data_reduced = np.vstack((data_reduced.T, label)).T
+        elif method == 'umap':
+            data_reduced = umap.UMAP(n_components=n_components).fit_transform(data_raw)
+            data_reduced = np.vstack((data_reduced.T, label)).T
         np.save(os.path.join(f'data/{dataset}/{method}', fname), data_reduced)
