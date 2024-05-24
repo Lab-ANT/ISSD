@@ -1,6 +1,5 @@
 """
-Created by Chengyu on 2023/11/15.
-This script uses selection methods to select indicators on all datasets.
+This script uses selection/reduction methods to select/reduce indicators on all datasets.
 """
 
 import sys
@@ -22,13 +21,15 @@ from sklearn.neighbors import KNeighborsClassifier
 # ECS/ECP
 from baselines.ChannelSelectionMTSC.src.classelbow import ElbowPair # ECP
 from baselines.ChannelSelectionMTSC.src.elbow import elbow # ECS
+# LDA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+# SFM
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectFromModel
 # umap and pca
 import umap
 from sklearn.decomposition import PCA
-# surpress warnings
+# surpress warnings, which are harmless
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -44,15 +45,15 @@ n_components = args.n_components
 print(f'Processing {dataset} using {method}')
 
 raw_data_path = f'data/{dataset}/raw'
-data_output_path = f'data/{dataset}/{method}' # save the selected data
-selection_output_path = f'output/selection/' # save the selected channels idx
+data_output_path = f'data/{dataset}/{method}' # path to save the selected data
+selection_output_path = f'output/selection/' # path to save the selected channels idx
 os.makedirs(data_output_path, exist_ok=True)
 os.makedirs(selection_output_path, exist_ok=True)
 
 if dataset not in ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']:
     raise ValueError(f'Unsupported dataset: {dataset}, the dataset should be [MoCap|SynSeg|ActRecTut|PAMAP2|USC-HAD]')
 if method not in ['issd-qf', 'issd-cf', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
-    raise ValueError(f'Unsupported method: {method}, to use pca/umap/human, please use reduction.py')
+    raise ValueError(f'Unsupported method: {method}')
 
 fname_list = os.listdir(raw_data_path)
 fname_list.sort()
@@ -131,27 +132,41 @@ elif method == 'sfs':
         data_reduced = data[:,selected_channels]
         data_reduced = np.vstack((data_reduced.T, state_seq)).T
         np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
+
 elif method in ['lda', 'ecp', 'ecs', 'sfm']:
-    for fname in tqdm.tqdm(fname_list):
+    # devide the dataset into two parts
+    part1_list = fname_list[:len(fname_list)//2]
+    part2_list = fname_list[len(fname_list)//2:]
+    
+    for i in range(2):
+        # rotate the dataset
+        if i == 0:
+            fname_list_train = part1_list
+            fname_list_test = part2_list
+        else:
+            fname_list_train = part2_list
+            fname_list_test = part1_list
         data_list = []
         state_seq_list = []
-        for fn_test in fname_list:
-            if fn_test == fname:
-                continue
+        for fn_test in fname_list_train:
             data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
             data_list.append(data)
             state_seq_list.append(state_seq)
-        test_data, test_label = load_data(os.path.join(raw_data_path, fname))
         data = np.vstack(data_list)
         state_seq = np.concatenate(state_seq_list)
-        # LDA
-        if method == 'lda':
-            # n_components cannot be larger than min(n_features, n_classes - 1).
-            n_components = min(n_components, len(np.unique(state_seq)) - 1)
-            lda = LinearDiscriminantAnalysis(n_components=n_components)
-            lda.fit(data, state_seq)
-            data_reduced = lda.transform(test_data)
-            data_reduced = np.vstack((data_reduced.T, test_label)).T
+        # SFM
+        if method == 'sfm':
+            estimator = LogisticRegression()
+            sfm = SelectFromModel(estimator, max_features=4)
+            sfm.fit(data, state_seq)
+            result = sfm.get_support(indices=True)
+            result = [int(e) for e in result]
+            print(result)
+            for fn_test in fname_list_test:
+                data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
+                data_reduced = data[:,result]
+                data_reduced = np.vstack((data_reduced.T, state_seq)).T
+                np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
         # ECP & ECS
         elif method == 'ecs' or method == 'ecp':
             center='mad' # options: mean, median
@@ -162,18 +177,23 @@ elif method in ['lda', 'ecp', 'ecs', 'sfm']:
             segments, label = adapt_for_clf(data, state_seq)
             elb.fit(pd.DataFrame(segments), compact(label))
             result = elb.relevant_dims[:n_components]
-            data_reduced = test_data[:,result]
-            data_reduced = np.vstack((data_reduced.T, test_label)).T
-        elif method == 'sfm':
-            estimator = LogisticRegression()
-            sfm = SelectFromModel(estimator, max_features=4)
-            sfm.fit(data, state_seq)
-            result = sfm.get_support(indices=True)
-            result = [int(e) for e in result]
             print(result)
-            data_reduced = test_data[:,result]
-            data_reduced = np.vstack((data_reduced.T, test_label)).T
-        np.save(os.path.join(f'data/{dataset}/{method}', fname), data_reduced)
+            for fn_test in fname_list_test:
+                data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
+                data_reduced = data[:,result]
+                data_reduced = np.vstack((data_reduced.T, state_seq)).T
+                np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
+        # LDA
+        elif method == 'lda':
+            # n_components cannot be larger than min(n_features, n_classes - 1).
+            n_components = min(n_components, len(np.unique(state_seq)) - 1)
+            lda = LinearDiscriminantAnalysis(n_components=n_components)
+            lda.fit(data, state_seq)
+            for fn_test in fname_list_test:
+                data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
+                data_reduced = lda.transform(data)
+                data_reduced = np.vstack((data_reduced.T, state_seq)).T
+                np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
 
 # reduction methods
 elif method in ['pca', 'umap']:
