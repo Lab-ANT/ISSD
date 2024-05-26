@@ -1,4 +1,4 @@
-# list of methods and datasets to run
+# run all selection methods
 method_list=(issd ecs ecp lda sfm pca umap)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
 
