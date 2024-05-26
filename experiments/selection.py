@@ -15,9 +15,6 @@ from miniutils import *
 from issd import issd
 from sklearn.feature_selection import mutual_info_regression
 from sklearn.decomposition import PCA
-# SFS
-from sklearn.feature_selection import SequentialFeatureSelector
-from sklearn.neighbors import KNeighborsClassifier
 # ECS/ECP
 from baselines.ChannelSelectionMTSC.src.classelbow import ElbowPair # ECP
 from baselines.ChannelSelectionMTSC.src.elbow import elbow # ECS
@@ -119,45 +116,6 @@ if method == 'issd':
             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
             data = data[:,selected_channels+[-1]]
             np.save(f'data/{dataset}/issd/{fname}', data)
-
-elif method == 'sfs':
-    # sfs has a low scalability,
-    # we use majority voting to select the channels for sfs
-    selected_channels_for_each_ts = []
-    for fname in tqdm.tqdm(fname_list):
-        data = np.load(os.path.join(raw_data_path, fname), allow_pickle=True)
-        label = data[:,-1].astype(int)
-        data = data[:,:-1]
-        # PAMAP2 is too large for sfs, requires 5x downsampling
-        if dataset == 'PAMAP2':
-            data = data[::5]
-            label = label[::5]
-        num_channels = data.shape[1]
-        # when n_components is less than half of the number of channels, use forward selection
-        # if n_components <= int(num_channels/2):
-        #     direction = 'forward'
-        # else:
-        #     direction = 'forward'
-        direction = 'forward'
-        knn = KNeighborsClassifier(n_neighbors=4)
-        sfs = SequentialFeatureSelector(knn,
-                                        n_features_to_select=n_components,
-                                        n_jobs=10,)
-        sfs.fit_transform(data, label)
-        result = sfs.get_support(indices=True)
-        result = [int(e) for e in result]
-        selected_channels_for_each_ts.append(result)
-    with open(os.path.join(selection_output_path, f'{dataset}_{method}.txt'), 'w') as f:
-        for fname, result in zip(fname_list, selected_channels_for_each_ts):
-            f.write(f'{fname} {result}\n')
-    # integrate
-    for fn_test in fname_list:
-        selected_channels = inte_from_txt(dataset, method, fn_test, 4)
-        print(selected_channels)
-        data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
-        data_reduced = data[:,selected_channels]
-        data_reduced = np.vstack((data_reduced.T, state_seq)).T
-        np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
 
 elif method in ['lda', 'ecp', 'ecs', 'sfm']:
     # devide the dataset into two parts

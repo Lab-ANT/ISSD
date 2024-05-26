@@ -6,6 +6,7 @@ data-temp/
 *.pdf
 *.o
 *.out
+*.output
 output/
 output-backup/
 data-backup/
