@@ -5,3 +5,5 @@ scikit-learn
 scipy
 tqdm
 tslearn
+umap-learn==0.5.3
+matplotlib
