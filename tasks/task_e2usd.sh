@@ -1,5 +1,5 @@
 # list of methods to run
-method_list=(issd pca umap ecs ecp lda sfm)
+method_list=(raw issd pca umap ecs ecp lda sfm)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
 
 for dataset in ${dataset_list[@]}; do
