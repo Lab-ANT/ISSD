@@ -43,9 +43,9 @@ print(f'Processing {dataset} using {method}')
 
 raw_data_path = f'data/{dataset}/raw'
 data_output_path = f'data/{dataset}/{method}' # path to save the selected data
-selection_output_path = f'output/selection/' # path to save the selected channels idx
 os.makedirs(data_output_path, exist_ok=True)
-os.makedirs(selection_output_path, exist_ok=True)
+# selection_output_path = f'output/selection/' # path to save the selected channels idx
+# os.makedirs(selection_output_path, exist_ok=True)
 
 if dataset not in ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']:
     raise ValueError(f'Unsupported dataset: {dataset}, the dataset should be [MoCap|SynSeg|ActRecTut|PAMAP2|USC-HAD]')
