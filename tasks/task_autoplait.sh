@@ -1,14 +1,90 @@
+#!/bin/bash
+
 # list of methods to run
+# method_list=(issd pca umap ecs ecp lda sfm)
+# dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
+
+# python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py
+# cd downstream_methods/AutoPlait
+# for dataset in ${dataset_list[@]}; do
+#     for method in ${method_list[@]}; do
+#         # echo $method
+#         bash experiments/run_AutoPlait.sh $dataset $method
+#     done
+# done
+# cd ../..
+# python downstream_methods/AutoPlait/experiments/redirect_results.py
+
+# use at most 50% of the CPU cores to run the tasks in for loop
+# cpu_core_num=$(cat /proc/cpuinfo | grep "processor" | wc -l)
+cpu_cores=$(nproc)
+echo "Total CPU cores: $cpu_cores"
+max_cores=$((cpu_cores / 2))
+echo "Max cores to use: $max_cores"
+
 method_list=(issd pca umap ecs ecp lda sfm)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
 
 python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py
 cd downstream_methods/AutoPlait
-for dataset in ${dataset_list[@]}; do
-    for method in ${method_list[@]}; do
-        # echo $method
-        bash experiments/run_AutoPlait.sh $dataset $method
+
+# get script PID
+# script_pid=$$
+# echo "Script PID: $script_pid"
+
+# save pids for easy stopping
+pids=()
+
+# cleanup on exit
+trap 'cleanup' INT TERM
+
+# cleanup function
+cleanup() {
+  echo "Cleaning up..."
+  for pid in "${pids[@]}"; do
+    echo "Killing process $pid"
+    kill "$pid"
+  done
+  exit 0
+}
+# cleanup() {
+#   echo "Cleaning up..."
+#   # get all child pids
+#   child_pids=$(pgrep -P $script_pid)
+#   for pid in $child_pids; do
+#     echo "Killing child process $pid"
+#     kill $pid
+#   done
+#   exit 0
+# }
+
+# run tasks in parallel
+run_tasks() {
+  for dataset in "${dataset_list[@]}"; do
+    for method in "${method_list[@]}"; do
+      bash experiments/run_AutoPlait.sh $dataset $method &
+      pid=$!
+      pids+=($pid)
+      echo "Started task with PID $pid for dataset $dataset and method $method"
+
+      # wait until there are less than max_cores processes running
+      while [[ ${#pids[@]} -ge $max_cores ]]; do
+        wait -n
+        # remove finished pids
+        for i in "${!pids[@]}"; do
+          if ! kill -0 "${pids[$i]}" 2>/dev/null; then
+            unset 'pids[i]'
+          fi
+        done
+      done
     done
-done
+  done
+}
+
+run_tasks
+wait
+
 cd ../..
-python downstream_methods/AutoPlait/experiments/rediredt_results.py
+python downstream_methods/AutoPlait/experiments/redirect_results.py
+
+echo "All tasks completed"
