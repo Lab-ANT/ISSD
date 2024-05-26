@@ -48,6 +48,62 @@ def majority_vote_on_results(result_list, K):
     result = elems[np.argsort(cnt)[::-1][:K]]
     return result
 
+def inte_issd_v2(dataset, K, fname_list, strategy):
+    # the result of fname will be excluded.
+    if strategy == 'qf':
+        fname_list = [fname[:-4] for fname in fname_list]
+        fname_list.sort()
+        interval_list = []
+        for fname in fname_list:
+            mean_inner = np.load(f'output/issd-qf/{dataset}/{fname}/mean_inner.npy')
+            mean_inter = np.load(f'output/issd-qf/{dataset}/{fname}/mean_inter.npy')
+            interval_list.append(mean_inter-mean_inner)
+        interval_list = np.array(interval_list)
+        interval_list = np.mean(interval_list, axis=0)
+        return list(np.argsort(interval_list)[::-1][:K])
+    elif strategy == 'cf':
+        fname_list = [fname[:-4] for fname in fname_list]
+        fname_list.sort()
+        channel_matirces = []
+        channel_interval = []
+        for fname in fname_list:
+            matrices = np.load(f'output/issd-cf/{dataset}/{fname}/matrices.npy')
+            max_inner = np.load(f'output/issd-cf/{dataset}/{fname}/max_inner.npy')
+            mean_inter = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inter.npy')
+            mean_inner = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inner.npy')
+            interval = mean_inter - mean_inner
+            channel_interval.append(interval)
+            indicator_matrices = [m>tau for m, tau in zip(matrices, max_inner)]
+            channel_matirces.append(indicator_matrices)
+        channel_interval = np.array(channel_interval).mean(axis=0)
+        per_channel_list = []
+        num_channels = channel_interval.shape[0]
+        num_ts = len(fname_list)
+        for i in range(num_channels):
+            list1 = []
+            for j in range(num_ts):
+                list1.append(channel_matirces[j][i].copy().flatten())
+            per_channel_list.append(np.concatenate(list1))
+
+        masked_idx = np.array([False]*len(per_channel_list))
+        per_channel_list = np.array(per_channel_list)
+        selected_channels = []
+        # idx = np.argmax(channel_interval)
+        # selected_channels.append(idx)
+        # masked_idx[idx] = True
+        # current_matrix = matrix_OR(per_channel_list[selected_channels])
+        current_matrix = np.zeros(per_channel_list[0].shape).astype(bool)
+        while len(selected_channels) < K:
+            remaining_idx = np.argwhere(~masked_idx).flatten()
+            costlist = np.array([cost(m, current_matrix) for m in per_channel_list])
+            candidate_c = np.max(costlist[remaining_idx])
+            candidate_idx = remaining_idx[np.argwhere(costlist[remaining_idx]==candidate_c).flatten()]
+            idx = candidate_idx[np.argmax(channel_interval[candidate_idx])]
+            selected_channels.append(idx)
+            masked_idx[idx] = True
+            current_matrix = matrix_OR(per_channel_list[selected_channels])
+        return selected_channels
+
 def inte_issd(dataset, K, fname, strategy):
     # the result of fname will be excluded.
     if strategy == 'qf':
