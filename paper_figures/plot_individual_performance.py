@@ -28,22 +28,14 @@ for metric in ['ari', 'nmi', 'purity']:
     num_dmethod = 4
     num_clf = table.shape[1]
 
-    fig, ax = plt.subplots(nrows=num_dmethod, ncols=5, figsize=(18, 12))
+    plt.style.use('classic')
+    fig, ax = plt.subplots(nrows=num_dmethod, ncols=5, figsize=(18, 14))
     for i in range(4):
         for j in range(5):
             ax[i,j].bar(clf_name_list,
                         table[i*5+j],
                         width=0.5,
-                        # edgecolor='none',
                         color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4'])
-            # Set Transparent bar to odd columns
-            # if j % 2 == 1:
-            #     for k in range(7):
-            #         ax[i,j].patches[k].set_alpha(0.5)
-            # add hatch to the bar
-            # ax[i,j].patches[0].set_hatch('/')
-            # hide x-axis label
-            ax[i,j].set_xticks([])
             info = dataset_names[i*5+j].split('/')
             mname = info[1]
             dname = info[0]
@@ -62,7 +54,7 @@ for metric in ['ari', 'nmi', 'purity']:
             # set ylabel closer to the plot
             ax[i,j].yaxis.labelpad = -10
             # rotate the x-axis label
-            ax[i,j].tick_params(axis='x', rotation=45)
+            ax[i,j].tick_params(axis='x', rotation=45, labelsize=12)
             # set y tick font size
             ax[i,j].tick_params(axis='y', labelsize=14)
             # add horizontal grid, use -- to make the grid line more visible
@@ -76,12 +68,12 @@ for metric in ['ari', 'nmi', 'purity']:
             # add a yellow star to the highest value
             max_val = max(table[i*5+j])
             max_idx = np.argwhere(table[i*5+j]==max_val)[0][0]
-            ax[i,j].scatter(max_idx, max_val+8, color='red', s=100, marker='*')
+            ax[i,j].scatter(max_idx, max_val+8, color='red', s=120, marker='*')
             # add a black start to the second highest value
             table[i*5+j][max_idx] = 0
             second_max_val = max(table[i*5+j])
             second_max_idx = np.argwhere(table[i*5+j]==second_max_val)[0][0]
-            ax[i,j].scatter(second_max_idx, second_max_val+8, color=air_force_blue, s=100, marker='*')
+            ax[i,j].scatter(second_max_idx, second_max_val+8, color=air_force_blue, s=120, marker='*')
 
     os.makedirs('output/figs', exist_ok=True)
     plt.tight_layout()

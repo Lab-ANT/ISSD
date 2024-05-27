@@ -214,7 +214,7 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
               (textspace - 0.1, chei)],
              linewidth=linewidth)
         if labels:
-            text(textspace + 0.3, chei - 0.075, format(ssums[i], '.4f'), ha="right", va="center", size=10)
+            text(textspace + 0.3, chei - 0.075, format(ssums[i], '.4f'), ha="right", va="center", size=10, color='#497fc0')
         text(textspace - 0.2, chei, filter_names(nnames[i]), ha="right", va="center", size=16)
 
     for i in range(math.ceil(k / 2), k):
@@ -224,7 +224,7 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
               (textspace + scalewidth + 0.1, chei)],
              linewidth=linewidth)
         if labels:
-            text(textspace + scalewidth - 0.3, chei - 0.075, format(ssums[i], '.4f'), ha="left", va="center", size=10)
+            text(textspace + scalewidth - 0.3, chei - 0.075, format(ssums[i], '.4f'), ha="left", va="center", size=10, color='#497fc0')
         text(textspace + scalewidth + 0.2, chei, filter_names(nnames[i]),
              ha="left", va="center", size=16)
 
@@ -261,7 +261,7 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
             achieved_half = True
         line([(rankpos(ssums[min_idx]) - side, start),
               (rankpos(ssums[max_idx]) + side, start)],
-             linewidth=linewidth_sign)
+             linewidth=linewidth_sign, color='#497fc0')
         start += height
 
 
@@ -417,7 +417,7 @@ for metric in ['ari', 'nmi', 'purity']:
         df.to_csv(f'output/summary_{metric}.csv', index=False)
 
     # result_file_path = 'output/summary_ari.csv'
-    out_file_name = f'CD_{metric}.pdf'
+    out_file_name = f'CD_{metric}.png'
     df_perf = pd.read_csv(f'output/summary_{metric}.csv', index_col=False)
     if metric == 'ari':
         draw_cd_diagram(df_perf=df_perf, title='ARI Rank', labels=True, alpha=0.05)

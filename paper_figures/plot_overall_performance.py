@@ -51,8 +51,9 @@ for metric in ['ari', 'purity', 'nmi']:
                     color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4'])
         # rotate the x-axis label
         ax[i].tick_params(axis='x', rotation=45)
-
         ax[i].grid(axis='y', lw=2, linestyle='--', color='gray')
+        # put grid behind the bars
+        # ax[i].set_axisbelow(True)
         ax[i].set_title(f'{dataset_names[i]}', fontsize=17)
         ax[i].set_ylim(0, 1.1)
         if metric == 'ari':
@@ -73,6 +74,7 @@ for metric in ['ari', 'purity', 'nmi']:
         ax[i].scatter(max_idx, max_val+0.08, color='red', s=120, marker='*')
         ax[i].scatter(second_max_idx, second_max_val+0.08, color='#5D8AA8', s=120, marker='*')
     plt.tight_layout()
-    plt.savefig(f'output/overall_performance_{metric}.pdf', bbox_inches='tight')
+    plt.savefig(f'output/figs/overall_performance_{metric}.png', bbox_inches='tight')
+    plt.savefig(f'output/figs/overall_performance_{metric}.pdf', bbox_inches='tight')
         
     
