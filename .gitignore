@@ -8,6 +8,8 @@ data-temp/
 *.out
 *.output
 output/
+execution*/
 output-backup/
+output-backup2/
 data-backup/
 unused/
