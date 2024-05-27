@@ -141,7 +141,7 @@ elif method in ['lda', 'ecp', 'ecs', 'sfm']:
         # SFM
         if method == 'sfm':
             estimator = LogisticRegression()
-            sfm = SelectFromModel(estimator, max_features=4)
+            sfm = SelectFromModel(estimator, max_features=n_components)
             sfm.fit(data, state_seq)
             result = sfm.get_support(indices=True)
             result = [int(e) for e in result]
