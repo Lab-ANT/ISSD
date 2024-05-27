@@ -17,33 +17,39 @@ python datautils/convert_data_format.py
 ```
 
 ## Environments
-We strongly recommend configuring the environments separately for selection methods, reduction methods, and downstream methods to avoid conflicts. Please prepare three virtual environments and install the following requirements separately
+We strongly recommend configuring the environments separately for selection/reduction methods and downstream methods to avoid conflicts. Please prepare two virtual environments and install the following requirements separately:
 ```
-requirements/selection.txt
-requirements/downstream.txt
-requirements/reduction.txt
+# selection/reduction environment
+conda create -n selection python=3.6
+conda activate selection
+pip install -r requirements/selection.txt
+
+# downstream environment
+conda create -n selection python=3.9
+conda activate downstream
+pip install -r requirements/downstream.txt
+```
+## Automatic reproduction
+Automatic scripts for running all downstream methods are placed in the ```tasks``` folder. You can automatically reproduce all experimental results reported in the paper by the following command:
+```
+bash tasks/run_all.sh <execution number>
+```
+In the paper, the experiment is independently conducted 5 times, you need to change the ```<execution number>``` and run the above command five times.
+
+Once done, please use the following command to obtain final results:
+```
+bash tasks/summary.sh
 ```
 
 ## Run Selection/Reduction Methods
-**Convert to the reduction environment**  
-Dimension reduction methods and human selection:
-```bash
-python experiments/reduction.py
-```
-
 **Convert to the selection environment**  
 ```bash
-python experiments/selection.py [e.g., MoCap] [e.g., issd-qf] [dim, e.g., 4]
+python experiments/selection.py [e.g., MoCap] [e.g., issd] [dim, e.g., 4]
 ```
 The above command takes 3 positional args:  
 Datasets: ```[MoCap|SynSeg|USC-HAD|SynSeg|PAMAP2]```  
-Downstream methods: ```[issd-qf|issd-cf|sfm|ecp|ecs]```  
+Downstream methods: ```[issd-qf|issd-cf|sfm|ecp|ecs|pca|umap]```  
 Desired #channels: ```e.g., 4```
-
-To use issd, you must run issd-qf and issd-cf on all datasets in advance, and then run
-```bash
-python experiments/inte.py
-```
 
 ## Run Downstream Methods
 **Convert to downstream environment**
@@ -62,7 +68,7 @@ python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py
 
 In downstream_methods/AutoPlait folder
 ```bash
-bash experiments runAutoPlait.sh [e.g.,MoCap] [e.g., pca]
+bash experiments/runAutoPlait.sh [e.g.,MoCap] [e.g., pca]
 ```
 
 In root folder
@@ -70,7 +76,7 @@ In root folder
 python downstream_methods/AutoPlait/experiments/redirect_results.py
 ```
 
-Automatic scripts for running all downstream methods are placed in the ```scripts``` folder
+Automatic scripts for running all downstream methods are placed in the ```tasks``` folder
 ## Results
 To obtain the results, please run
 ```bash
