@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # delete selection and reduction results
 method_list=(issd issd-qf issd-cf pca umap ecs ecp lda sfm pca umap human sfs)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)

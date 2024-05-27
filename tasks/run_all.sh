@@ -1,3 +1,5 @@
+#!/bin/bash
+
 execution_num=$1
 
 # activate conda

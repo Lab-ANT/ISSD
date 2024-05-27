@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # list of methods to run
 method_list=(issd)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
