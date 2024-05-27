@@ -28,10 +28,6 @@ dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
 python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py
 cd downstream_methods/AutoPlait
 
-# get script PID
-# script_pid=$$
-# echo "Script PID: $script_pid"
-
 # save pids for easy stopping
 pids=()
 
@@ -39,6 +35,8 @@ pids=()
 trap 'cleanup' INT TERM
 
 # cleanup function
+# TODO: this function is not working as expected
+# there are always # max_cores processes left running
 cleanup() {
   echo "Cleaning up..."
   for pid in "${pids[@]}"; do
@@ -47,16 +45,6 @@ cleanup() {
   done
   exit 0
 }
-# cleanup() {
-#   echo "Cleaning up..."
-#   # get all child pids
-#   child_pids=$(pgrep -P $script_pid)
-#   for pid in $child_pids; do
-#     echo "Killing child process $pid"
-#     kill $pid
-#   done
-#   exit 0
-# }
 
 # run tasks in parallel
 run_tasks() {
@@ -85,6 +73,5 @@ run_tasks
 wait
 
 cd ../..
-python downstream_methods/AutoPlait/experiments/redirect_results.py
 
 echo "All tasks completed"
