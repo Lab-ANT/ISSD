@@ -1,6 +1,14 @@
 execution_num=$1
 
+# activate conda
+source ~/anaconda3/etc/profile.d/conda.sh
+conda activate selection
+echo "current environment: $CONDA_DEFAULT_ENV"
+
 bash tasks/run_selection.sh
+
+conda activate statecorr
+echo "current environment: $CONDA_DEFAULT_ENV"
 
 # sequentially run all tasks
 bash tasks/task_autoplait.sh > output/task_autoplait.out
