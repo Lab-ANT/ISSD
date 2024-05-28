@@ -86,8 +86,8 @@ if method == 'issd':
             fname_list_train = part2_list
             fname_list_test = part1_list
 
-        selected_channels_qf = inte_issd_v2(dataset, 4, fname_list_train, 'qf')
-        selected_channels_cf = inte_issd_v2(dataset, 4, fname_list_train, 'cf')
+        selected_channels_qf = inte_issd_v2(dataset, n_components, fname_list_train, 'qf')
+        selected_channels_cf = inte_issd_v2(dataset, n_components, fname_list_train, 'cf')
 
         print(f'qf: {selected_channels_qf}')
         print(f'cf: {selected_channels_cf}')
