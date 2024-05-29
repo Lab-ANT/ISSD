@@ -387,9 +387,11 @@ def wilcoxon_holm(alpha=0.05, df_perf=None):
     # return the p-values and the average ranks
     return p_values, average_ranks, max_nb_datasets
 
-clf_name_list = ['ISSD', 'PCA', 'UMAP', 'ECP', 'ECS', 'LDA', 'SFM', 'MI']
-
 for metric in ['ari', 'nmi', 'purity']:
+    with open(f'output/summary_{metric}.txt', 'r') as f:
+        lines = f.readlines()
+        method_name_list = lines[1].split('|')[2:-1]
+        method_name_list = [name.strip().upper() for name in method_name_list]
     with open(f'output/summary_{metric}.txt', 'r') as f:
         lines = f.readlines()[3:-1]
         # remove \n at the end of each line
@@ -410,7 +412,7 @@ for metric in ['ari', 'nmi', 'purity']:
         num_rows, num_cols = table.shape
         for j in range(num_cols):
             for i in range(num_rows):
-                clf_name_col.append(clf_name_list[j])
+                clf_name_col.append(method_name_list[j])
                 dataset_name_col.append(dataset_names[i])
                 acc_col.append(table[i,j])
         df = pd.DataFrame({'classifier_name': clf_name_col, 'dataset_name': dataset_name_col, 'accuracy': acc_col})

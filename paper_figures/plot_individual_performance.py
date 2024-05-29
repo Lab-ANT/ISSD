@@ -3,13 +3,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-clf_name_list = ['ISSD', 'PCA', 'UMAP', 'ECP', 'ECS', 'LDA', 'SFM', 'MI']
 dmethod_names = ['Time2State', 'TICC', 'E2USD', 'AutoPlait']
 dmethod_names_lower = ['time2state', 'ticc', 'e2usd', 'autoplait']
 
 air_force_blue = '#5D8AA8'
 
 for metric in ['ari', 'nmi', 'purity']:
+    with open(f'output/summary_{metric}.txt', 'r') as f:
+        lines = f.readlines()
+        method_name_list = lines[1].split('|')[2:-1]
+        method_name_list = [name.strip().upper() for name in method_name_list]
     with open(f'output/summary_{metric}.txt', 'r') as f:
         lines = f.readlines()[3:-1]
         # remove \n at the end of each line
@@ -32,7 +35,7 @@ for metric in ['ari', 'nmi', 'purity']:
     fig, ax = plt.subplots(nrows=num_dmethod, ncols=5, figsize=(18, 14))
     for i in range(4): # 4 downstream methods
         for j in range(5): # 5 datasets
-            ax[i,j].bar(clf_name_list,
+            ax[i,j].bar(method_name_list,
                         table[i*5+j],
                         width=0.5,
                         color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4'])

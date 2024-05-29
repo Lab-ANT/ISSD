@@ -3,16 +3,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-clf_name_list = ['ISSD', 'PCA', 'UMAP', 'ECP', 'ECS', 'LDA', 'SFM', 'MI']
 dmethod_names = ['Time2State', 'TICC', 'E2USD', 'AutoPlait']
 dmethod_names_lower = ['time2state', 'ticc', 'e2usd', 'autoplait']
-# dataset_names = ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'Synthetic']
 
 num_dmethod = len(dmethod_names)
 
 os.makedirs('output/figs', exist_ok=True)
 
 for metric in ['ari', 'purity', 'nmi']:
+    with open(f'output/summary_{metric}.txt', 'r') as f:
+        lines = f.readlines()
+        method_name_list = lines[1].split('|')[2:-1]
+        method_name_list = [name.strip().upper() for name in method_name_list]
     with open(f'output/summary_{metric}.txt', 'r') as f:
         lines = f.readlines()[3:-1]
         # remove \n at the end of each line
@@ -45,7 +47,7 @@ for metric in ['ari', 'purity', 'nmi']:
     plt.style.use('classic')
     fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(15, 3))
     for i, avg_scores in enumerate(avg_score_on_datasets):
-        ax[i].bar(clf_name_list,
+        ax[i].bar(method_name_list,
                     avg_scores,
                     width=0.5,
                     color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4'])
