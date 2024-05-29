@@ -14,17 +14,14 @@ import sys
 sys.path.append('.')
 from miniutils import compact, reorder_label
 
-methods = ['raw', 'issd', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap']
-method_labels = ['Raw', 'ISSD', 'LDA', 'SFM', 'ECP', 'ECS', 'PCA', 'UMAP']
+methods = ['raw', 'issd', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap', 'mi']
+method_labels = ['Raw', 'ISSD', 'LDA', 'SFM', 'ECP', 'ECS', 'PCA', 'UMAP', 'MI']
 dataset = ['Synthetic', 'MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD']
 
 for d in dataset:
     fname_list = os.listdir(f'data/{d}/raw/')
     for fname in fname_list:
-        # if not os.path.exists(f'output/selection/{d}_{m}.txt'):
-        #     print(f'output/selection/{d}_{m}.txt does not exists, passed')
-        #     continue
-        os.makedirs(f'output/case-studies/{d}', exist_ok=True)
+        os.makedirs(f'output/visualization/{d}', exist_ok=True)
         plt.style.use('classic')
         plt.rcParams['pdf.fonttype'] = 42
         fig, ax = plt.subplots(nrows=len(methods), figsize=(5,len(methods)*0.85))
@@ -50,5 +47,5 @@ for d in dataset:
             ax[methods.index(m)].set_ylim(0, 1)
             ax[methods.index(m)].set_ylabel(method_labels[methods.index(m)])
         plt.tight_layout()
-        plt.savefig(f'output/case-studies/{d}/{fname[:-4]}.png')
+        plt.savefig(f'output/visualization/{d}/{fname[:-4]}.png')
         plt.close()
