@@ -16,7 +16,7 @@ parser.add_argument('metric', type=str, help='The metric for evaluation')
 args = parser.parse_args()
 metric = args.metric
 
-methods = ['issd', 'pca', 'umap', 'ecp', 'ecs', 'lda', 'sfm']
+methods = ['issd', 'pca', 'umap', 'ecp', 'ecs', 'lda', 'sfm', 'mi']
 
 downstream_methods = ['time2state', 'ticc', 'autoplait', 'e2usd']
 datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']
@@ -36,37 +36,36 @@ for dm in downstream_methods:
         row = [f'{dataset}/{dm}']
         for method in methods:
             fname_list = os.listdir(os.path.join(script_path, f'../data/{dataset}/raw'))
-            if method in ['pca', 'umap', 'issd', 'ecs', 'ecp', 'lda', 'sfm']:
-                score_list = []
-                result_path = os.path.join(script_path, f'../output/results/{dm}/{dataset}/{method}')
-                if not os.path.exists(result_path):
-                    row.append('x')
-                    continue
-                non_converge_flag = False
-                non_converge_cnt = 0
-                # print and do not end line
-                print(f'{dataset}/{dm}/{method}', end=': ')
-                for fn in fname_list:
-                    if not os.path.exists(os.path.join(result_path, fn)):
-                            # print(f'{dataset}/{dm}/{method}/{fn} not exists')
-                            non_converge_flag = True
-                            non_converge_cnt += 1
-                            score_list.append(0)
-                            continue
-                    data = np.load(os.path.join(result_path, fn), allow_pickle=True)
-                    if metric == 'nmi':
-                        score = normalized_mutual_info_score(data[0].astype(int), data[1].astype(int))
-                    elif metric == 'ari':
-                        score = adjusted_mutual_info_score(data[0].astype(int), data[1].astype(int))
-                    elif metric == 'purity':
-                        score = purity_score(data[0].astype(int), data[1].astype(int))
-                    score_list.append(score)
-                if non_converge_flag:
-                    print(f'{dataset}/{dm}/{method} has {non_converge_cnt} non-converge results')
-                else:
-                    print('\t')
-                nmi_mean = np.mean(np.array(score_list)*100)
-                row.append(f'{nmi_mean:.2f}')
+            score_list = []
+            result_path = os.path.join(script_path, f'../output/results/{dm}/{dataset}/{method}')
+            if not os.path.exists(result_path):
+                row.append('x')
+                continue
+            non_converge_flag = False
+            non_converge_cnt = 0
+            # print and do not end line
+            print(f'{dataset}/{dm}/{method}', end=': ')
+            for fn in fname_list:
+                if not os.path.exists(os.path.join(result_path, fn)):
+                        # print(f'{dataset}/{dm}/{method}/{fn} not exists')
+                        non_converge_flag = True
+                        non_converge_cnt += 1
+                        score_list.append(0)
+                        continue
+                data = np.load(os.path.join(result_path, fn), allow_pickle=True)
+                if metric == 'nmi':
+                    score = normalized_mutual_info_score(data[0].astype(int), data[1].astype(int))
+                elif metric == 'ari':
+                    score = adjusted_mutual_info_score(data[0].astype(int), data[1].astype(int))
+                elif metric == 'purity':
+                    score = purity_score(data[0].astype(int), data[1].astype(int))
+                score_list.append(score)
+            if non_converge_flag:
+                print(f'{dataset}/{dm}/{method} has {non_converge_cnt} non-converge results')
+            else:
+                print('\t')
+            nmi_mean = np.mean(np.array(score_list)*100)
+            row.append(f'{nmi_mean:.2f}')
 
         pretty_table.add_row(row)
 print(pretty_table)

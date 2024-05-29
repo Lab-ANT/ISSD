@@ -387,7 +387,7 @@ def wilcoxon_holm(alpha=0.05, df_perf=None):
     # return the p-values and the average ranks
     return p_values, average_ranks, max_nb_datasets
 
-clf_name_list = ['ISSD', 'PCA', 'UMAP', 'ECP', 'ECS', 'LDA', 'SFM']
+clf_name_list = ['ISSD', 'PCA', 'UMAP', 'ECP', 'ECS', 'LDA', 'SFM', 'MI']
 
 for metric in ['ari', 'nmi', 'purity']:
     with open(f'output/summary_{metric}.txt', 'r') as f:

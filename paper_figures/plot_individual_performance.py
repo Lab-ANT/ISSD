@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-clf_name_list = ['ISSD', 'PCA', 'UMAP', 'ECP', 'ECS', 'LDA', 'SFM']
+clf_name_list = ['ISSD', 'PCA', 'UMAP', 'ECP', 'ECS', 'LDA', 'SFM', 'MI']
 dmethod_names = ['Time2State', 'TICC', 'E2USD', 'AutoPlait']
 dmethod_names_lower = ['time2state', 'ticc', 'e2usd', 'autoplait']
 
@@ -30,8 +30,8 @@ for metric in ['ari', 'nmi', 'purity']:
 
     plt.style.use('classic')
     fig, ax = plt.subplots(nrows=num_dmethod, ncols=5, figsize=(18, 14))
-    for i in range(4):
-        for j in range(5):
+    for i in range(4): # 4 downstream methods
+        for j in range(5): # 5 datasets
             ax[i,j].bar(clf_name_list,
                         table[i*5+j],
                         width=0.5,
@@ -64,7 +64,7 @@ for metric in ['ari', 'nmi', 'purity']:
             ax[i,j].spines['right'].set_linewidth(2)
             ax[i,j].spines['bottom'].set_linewidth(2)
             ax[i,j].spines['left'].set_linewidth(2)
-            ax[i,j].set_xlim([-0.5, 6.5])
+            # ax[i,j].set_xlim([-0.5, 6.5])
             # add a yellow star to the highest value
             max_val = max(table[i*5+j])
             max_idx = np.argwhere(table[i*5+j]==max_val)[0][0]
