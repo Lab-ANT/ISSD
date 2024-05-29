@@ -21,5 +21,11 @@ bash tasks/task_ticc.sh > output/log_ticc.out
 
 python downstream_methods/AutoPlait/experiments/redirect_results.py
 
+# summary results and plot figures
+python experiments/summary.py
+python paper_figures/plot_overall_performance.py
+python paper_figures/plot_individual_performance.py
+python paper_figures/plot_cd.py
+
 bash tasks/archive_execution.sh $execution_num
 bash tasks/del_selection_results.sh
