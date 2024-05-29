@@ -49,12 +49,21 @@ os.makedirs(data_output_path, exist_ok=True)
 
 if dataset not in ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']:
     raise ValueError(f'Unsupported dataset: {dataset}, the dataset should be [MoCap|SynSeg|ActRecTut|PAMAP2|USC-HAD]')
-if method not in ['issd', 'issd-qf', 'issd-cf', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
+if method not in ['issd', 'issd-qf', 'issd-cf', 'mi', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
     raise ValueError(f'Unsupported method: {method}')
 
 fname_list = os.listdir(raw_data_path)
 fname_list.sort()
 selected_channels = []
+
+def mutual_info_selector(data, state_seq, n_components):
+    score_list = []
+    num_channels = data.shape[1]
+    for i in range(num_channels):
+        score=mutual_info_regression(data[:,i].reshape(-1,1), state_seq)[0]
+        score_list.append(score)
+    idx_sorted = np.argsort(score_list)[::-1]
+    return list(idx_sorted[:n_components])
 
 if method == 'issd':
     # precompute statistics for all time series
@@ -117,7 +126,7 @@ if method == 'issd':
             data = data[:,selected_channels+[-1]]
             np.save(f'data/{dataset}/issd/{fname}', data)
 
-elif method in ['lda', 'ecp', 'ecs', 'sfm']:
+elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
     # devide the dataset into two parts
     part1_list = fname_list[:len(fname_list)//2]
     part2_list = fname_list[len(fname_list)//2:]
@@ -145,6 +154,15 @@ elif method in ['lda', 'ecp', 'ecs', 'sfm']:
             sfm.fit(data, state_seq)
             result = sfm.get_support(indices=True)
             result = [int(e) for e in result]
+            print(result)
+            for fn_test in fname_list_test:
+                data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
+                data_reduced = data[:,result]
+                data_reduced = np.vstack((data_reduced.T, state_seq)).T
+                np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
+        # MI
+        elif method == 'mi':
+            result = mutual_info_selector(data, state_seq, n_components)
             print(result)
             for fn_test in fname_list_test:
                 data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
