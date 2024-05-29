@@ -3,16 +3,34 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dmethod_names = ['Time2State', 'TICC', 'E2USD', 'AutoPlait']
-dmethod_names_lower = ['time2state', 'ticc', 'e2usd', 'autoplait']
+# dmethod_names = ['Time2State', 'TICC', 'E2USD', 'AutoPlait']
+# dmethod_names_lower = ['time2state', 'ticc', 'e2usd', 'autoplait']
 
 air_force_blue = '#5D8AA8'
 
 for metric in ['ari', 'nmi', 'purity']:
     with open(f'output/summary_{metric}.txt', 'r') as f:
+        # retrieve method names
         lines = f.readlines()
         method_name_list = lines[1].split('|')[2:-1]
         method_name_list = [name.strip().upper() for name in method_name_list]
+    with open(f'output/summary_{metric}.txt', 'r') as f:
+        # retrieve downstream method names
+        lines = f.readlines()
+        lines = lines[3:-1]
+        name_rows = [line.split('|')[1].strip() for line in lines]
+        name_rows = [name.split('/')[1] for name in name_rows]
+        # remove duplicates and keep the order
+        dmethod_name_list = list(dict.fromkeys(name_rows))
+    with open(f'output/summary_{metric}.txt', 'r') as f:
+        # retrieve dataset names
+        lines = f.readlines()
+        lines = lines[3:-1]
+        name_rows = [line.split('|')[1].strip() for line in lines]
+        name_rows = [name.split('/')[0] for name in name_rows]
+        # remove duplicates and keep the order
+        dataset_name_list = list(dict.fromkeys(name_rows))
+    print(f'methods: {method_name_list}, downstream methods: {dmethod_name_list}, datasets: {dataset_name_list}')
     with open(f'output/summary_{metric}.txt', 'r') as f:
         lines = f.readlines()[3:-1]
         # remove \n at the end of each line
@@ -28,13 +46,14 @@ for metric in ['ari', 'nmi', 'purity']:
         dataset_names = [line[0] for line in lines]
         table = np.array(table)
 
-    num_dmethod = 4
-    num_clf = table.shape[1]
+    num_dmethods = len(dmethod_name_list)
+    num_datasets = len(dataset_name_list)
+    # num_clf = table.shape[1]
 
     plt.style.use('classic')
-    fig, ax = plt.subplots(nrows=num_dmethod, ncols=5, figsize=(18, 14))
-    for i in range(4): # 4 downstream methods
-        for j in range(5): # 5 datasets
+    fig, ax = plt.subplots(nrows=num_dmethods, ncols=5, figsize=(18, 14))
+    for i in range(num_dmethods): # 4 downstream methods
+        for j in range(num_datasets): # 5 datasets
             ax[i,j].bar(method_name_list,
                         table[i*5+j],
                         width=0.5,
@@ -43,8 +62,7 @@ for metric in ['ari', 'nmi', 'purity']:
             mname = info[1]
             dname = info[0]
             # add bold title
-            # ax[i,j].set_title(f'{dmethod_names[i]}', fontsize=19)
-            ax[i,j].set_title(f'{dmethod_names[dmethod_names_lower.index(mname)]} on {dname}',
+            ax[i,j].set_title(f'{mname} on {dname}',
                             fontsize=19)
                             #   fontweight='bold')
             ax[i,j].set_ylim(0, 115)

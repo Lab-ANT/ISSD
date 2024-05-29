@@ -3,18 +3,36 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dmethod_names = ['Time2State', 'TICC', 'E2USD', 'AutoPlait']
-dmethod_names_lower = ['time2state', 'ticc', 'e2usd', 'autoplait']
+# dmethod_names = ['Time2State', 'TICC', 'E2USD', 'AutoPlait']
+# dmethod_names_lower = ['time2state', 'ticc', 'e2usd', 'autoplait']
 
-num_dmethod = len(dmethod_names)
+# num_dmethod = len(dmethod_names)
 
 os.makedirs('output/figs', exist_ok=True)
 
 for metric in ['ari', 'purity', 'nmi']:
     with open(f'output/summary_{metric}.txt', 'r') as f:
+        # retrieve method names
         lines = f.readlines()
         method_name_list = lines[1].split('|')[2:-1]
         method_name_list = [name.strip().upper() for name in method_name_list]
+    with open(f'output/summary_{metric}.txt', 'r') as f:
+        # retrieve downstream method names
+        lines = f.readlines()
+        lines = lines[3:-1]
+        name_rows = [line.split('|')[1].strip() for line in lines]
+        name_rows = [name.split('/')[1] for name in name_rows]
+        # remove duplicates and keep the order
+        dmethod_name_list = list(dict.fromkeys(name_rows))
+    with open(f'output/summary_{metric}.txt', 'r') as f:
+        # retrieve dataset names
+        lines = f.readlines()
+        lines = lines[3:-1]
+        name_rows = [line.split('|')[1].strip() for line in lines]
+        name_rows = [name.split('/')[0] for name in name_rows]
+        # remove duplicates and keep the order
+        dataset_name_list = list(dict.fromkeys(name_rows))
+    print(f'methods: {method_name_list}, downstream methods: {dmethod_name_list}, datasets: {dataset_name_list}')
     with open(f'output/summary_{metric}.txt', 'r') as f:
         lines = f.readlines()[3:-1]
         # remove \n at the end of each line
@@ -34,12 +52,13 @@ for metric in ['ari', 'purity', 'nmi']:
         print(dataset_names, method_names)
         table = np.array(table)
     table = table/100
-    num_datasets = int(table.shape[0]/num_dmethod)
+    num_dmethods = len(dmethod_name_list)
+    num_datasets = int(table.shape[0]/num_dmethods)
 
     # partition the table by downstream methods
     avg_score_on_datasets = []
     for i in range(num_datasets):
-        dataset_idx = [j*num_datasets+i for j in range(num_dmethod)]
+        dataset_idx = [j*num_datasets+i for j in range(num_dmethods)]
         dataset_rows = table[dataset_idx]
         avg_score_on_datasets.append(np.mean(dataset_rows, axis=0))
     avg_score_on_datasets = np.array(avg_score_on_datasets)
