@@ -26,6 +26,9 @@ from sklearn.feature_selection import SelectFromModel
 # umap and pca
 import umap
 from sklearn.decomposition import PCA
+# SFS
+from sklearn.feature_selection import SequentialFeatureSelector
+from sklearn.neighbors import KNeighborsClassifier
 # surpress warnings, which are harmless
 import warnings
 warnings.filterwarnings("ignore")
@@ -49,7 +52,7 @@ os.makedirs(data_output_path, exist_ok=True)
 
 if dataset not in ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']:
     raise ValueError(f'Unsupported dataset: {dataset}, the dataset should be [MoCap|SynSeg|ActRecTut|PAMAP2|USC-HAD]')
-if method not in ['issd', 'issd-qf', 'issd-cf', 'mi', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
+if method not in ['issd', 'issd-qf', 'issd-cf', 'mi', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap', 'sfs']:
     raise ValueError(f'Unsupported method: {method}')
 
 fname_list = os.listdir(raw_data_path)
@@ -125,6 +128,51 @@ if method == 'issd':
             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
             data = data[:,selected_channels+[-1]]
             np.save(f'data/{dataset}/issd/{fname}', data)
+
+elif method == 'sfs':
+    # devide the dataset into two parts
+    part1_list = fname_list[:len(fname_list)//2]
+    part2_list = fname_list[len(fname_list)//2:]
+    
+    for i in range(2):
+        # rotate the dataset
+        if i == 0:
+            fname_list_train = part1_list
+            fname_list_test = part2_list
+        else:
+            fname_list_train = part2_list
+            fname_list_test = part1_list
+
+        selected_channels_for_each_ts = []
+        for fname in tqdm.tqdm(fname_list_train):
+            data = np.load(os.path.join(raw_data_path, fname), allow_pickle=True)
+            label = data[:,-1].astype(int)
+            data = data[:,:-1]
+            # PAMAP2 is too large for sfs, requires 5x downsampling
+            if dataset == 'PAMAP2':
+                data = data[::5]
+                label = label[::5]
+            num_channels = data.shape[1]
+            knn = KNeighborsClassifier(n_neighbors=4)
+            sfs = SequentialFeatureSelector(knn,
+                                        n_features_to_select=n_components,
+                                        n_jobs=10,)
+            sfs.fit_transform(data, label)
+            result = sfs.get_support(indices=True)
+            result = [int(e) for e in result]
+            selected_channels_for_each_ts.append(result)
+        # majority voting
+        results = np.array(selected_channels_for_each_ts).flatten()
+        elems, cnt = np.unique(results, return_counts=True)
+        result = elems[np.argsort(cnt)[::-1][:n_components]]
+        print(result)
+        
+        # integrate
+        for fn_test in fname_list_test:
+            data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
+            data_reduced = data[:,result]
+            data_reduced = np.vstack((data_reduced.T, state_seq)).T
+            np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
 
 elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
     # devide the dataset into two parts
