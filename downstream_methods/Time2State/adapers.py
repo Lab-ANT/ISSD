@@ -5,12 +5,22 @@ Created by Chengyu on 2022/2/26.
 import numpy as np
 import sys
 import os
-from TSpy.utils import all_normalize
+# from TSpy.utils import all_normalize
 sys.path.append(os.path.dirname(__file__))
 import encoders
 from .abstractions import *
-import tnc
-import cpc
+# import tnc
+# import cpc
+import math
+
+def all_normalize(data_tensor):
+    mean = np.mean(data_tensor)
+    var = np.var(data_tensor)
+    i = 0
+    for channel in data_tensor[0]:
+        data_tensor[0][i] = (channel - mean)/math.sqrt(var)
+        i += 1
+    return data_tensor
 
 class LSTM_LSE_Adaper(BasicEncoderClass):
     def _set_parmas(self, params):

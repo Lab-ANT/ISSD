@@ -3,8 +3,40 @@ Created by Chengyu on 2022/2/26.
 '''
 
 import numpy as np
-from TSpy.label import reorder_label
-from TSpy.utils import calculate_scalar_velocity_list
+# from TSpy.label import reorder_label
+# from TSpy.utils import calculate_scalar_velocity_list
+
+def compact(series):
+    '''
+    Compact Time Series.
+    '''
+    compacted = []
+    pre = series[0]
+    compacted.append(pre)
+    for e in series[1:]:
+        if e != pre:
+            pre = e
+            compacted.append(e)
+    return compacted
+
+def remove_duplication(series):
+    '''
+    Remove duplication.
+    '''
+    result = []
+    for e in series:
+        if e not in result:
+            result.append(e)
+    return result
+
+def reorder_label(label):
+    # Start from 0.
+    label = np.array(label)
+    ordered_label_set = remove_duplication(compact(label))
+    idx_list = [np.argwhere(label==e) for e in ordered_label_set]
+    for i, idx in enumerate(idx_list):
+        label[idx] = i
+    return label
 
 class Time2State:
     def __init__(self, win_size, step, encoder, clustering_component, verbose=False):
