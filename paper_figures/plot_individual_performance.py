@@ -51,7 +51,7 @@ for metric in ['ari', 'nmi', 'purity']:
     # num_clf = table.shape[1]
 
     plt.style.use('classic')
-    fig, ax = plt.subplots(nrows=num_dmethods, ncols=5, figsize=(18, 14))
+    fig, ax = plt.subplots(nrows=num_dmethods, ncols=5, figsize=(3.5*num_datasets, 3.5*num_dmethods))
     for i in range(num_dmethods): # 4 downstream methods
         for j in range(num_datasets): # 5 datasets
             ax[i,j].bar(method_name_list,

@@ -64,7 +64,7 @@ for metric in ['ari', 'purity', 'nmi']:
     avg_score_on_datasets = np.array(avg_score_on_datasets)
 
     plt.style.use('classic')
-    fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(15, 3))
+    fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(3*num_datasets, 3))
     for i, avg_scores in enumerate(avg_score_on_datasets):
         ax[i].bar(method_name_list,
                     avg_scores,
