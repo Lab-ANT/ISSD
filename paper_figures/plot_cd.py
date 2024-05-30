@@ -185,7 +185,7 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
     bigtick = 0.3
     smalltick = 0.15
     linewidth = 2.0
-    linewidth_sign = 4.0
+    linewidth_sign = 3.0
 
     tick = None
     for a in list(np.arange(lowv, highv, 0.5)) + [highv]:
@@ -214,8 +214,8 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
               (textspace - 0.1, chei)],
              linewidth=linewidth)
         if labels:
-            text(textspace + 0.4, chei - 0.075, format(ssums[i], '.4f'),
-                 ha="right", va="center", size=10, color='#497fc0', fontweight='bold')
+            text(textspace + 0.6, chei - 0.075, format(ssums[i], '.4f'),
+                 ha="right", va="center", size=12, color='#497fc0', fontweight='bold')
         text(textspace - 0.2, chei, filter_names(nnames[i]),
              ha="right", va="center", size=16)
 
@@ -226,8 +226,8 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
               (textspace + scalewidth + 0.1, chei)],
              linewidth=linewidth)
         if labels:
-            text(textspace + scalewidth - 0.4, chei - 0.075, format(ssums[i], '.4f'),
-                 ha="left", va="center", size=10, color='#497fc0', fontweight='bold')
+            text(textspace + scalewidth - 0.6, chei - 0.075, format(ssums[i], '.4f'),
+                 ha="left", va="center", size=12, color='#497fc0', fontweight='bold')
         text(textspace + scalewidth + 0.2, chei, filter_names(nnames[i]),
              ha="left", va="center", size=16)
 
