@@ -138,14 +138,9 @@ def issd(indicators, state_seq, K,
     method_ctm = calculate_true_matrix if strategy == 'qf' else calculate_true_matrix_cf
     true_matrix, cut_points = method_ctm(state_seq)
     min_seg_len = np.min(np.diff(cut_points))
-    # Find subseries length k for nntest.
-    # acf = find_k_by_acf(indicators,
-    #                     min_seg_len if min_seg_len<subseries_length else subseries_length,
-    #                     default=subseries_length)
     acf = find_k_by_acf(indicators,
                         min_seg_len if min_seg_len<500 else 500,
                         default=min_seg_len-1)
-    
 
     # CLUSTER INDICATORS BY PEARSON CORRELATION
     corr_matrix = pd.DataFrame(indicators).corr(method='pearson').to_numpy()
