@@ -93,9 +93,4 @@ class DownstreamMethodAdaper():
                 exit()
             except:
                 return None
-        elif self.method == 'constant':
-            # generate a constant prediction
-            prediction = np.random.randint(num_states, size=data.shape[0])
-            prediction = np.zeros(data.shape[0], dtype=int)
-            return prediction
         return prediction
