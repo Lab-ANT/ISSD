@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 datasets = ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']
-methods = ['pca', 'umap', 'issd', 'ecp', 'ecs', 'lda', 'sfm', 'mi', 'sfs']
+methods = ['pca', 'umap', 'issd', 'ecp', 'ecs', 'lda', 'sfm']
 
 for d in datasets:
     for m in methods:

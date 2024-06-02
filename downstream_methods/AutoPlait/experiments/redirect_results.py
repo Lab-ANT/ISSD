@@ -9,7 +9,7 @@ import re
 import pandas as pd
 
 datasets = ['MoCap', 'SynSeg', 'ActRecTut', 'USC-HAD', 'PAMAP2']
-methods = ['issd', 'sfm', 'pca', 'umap', 'ecs', 'ecp', 'lda', 'mi', 'sfs']
+methods = ['issd', 'sfm', 'pca', 'umap', 'ecs', 'ecp', 'lda']
 
 def len_of_file(path):
     return len(open(path,'r').readlines())
