@@ -7,7 +7,7 @@ echo "Total CPU cores: $cpu_cores"
 max_cores=$((cpu_cores / 2))
 echo "Max cores to use: $max_cores"
 
-method_list=(issd pca umap ecs ecp lda sfm mi sfs)
+method_list=(issd pca umap ecs ecp lda sfm)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
 
 python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py

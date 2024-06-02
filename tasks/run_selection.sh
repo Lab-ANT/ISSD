@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # run all selection methods
-method_list=(issd ecs ecp lda sfm pca umap mi sfs)
+method_list=(issd ecs ecp lda sfm pca umap)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
 
 for dataset in ${dataset_list[@]}; do
