@@ -14,8 +14,7 @@ import sys
 sys.path.append('.')
 from miniutils import compact, reorder_label
 
-methods = ['raw', 'issd', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap', 'mi']
-method_labels = ['Raw', 'ISSD', 'LDA', 'SFM', 'ECP', 'ECS', 'PCA', 'UMAP', 'MI']
+methods = ['raw', 'issd', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap']
 dataset = ['SynSeg', 'MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD']
 
 for d in dataset:
@@ -45,7 +44,7 @@ for d in dataset:
                 # tick.label.set_fontsize(6)
                 tick.label1.set_fontsize(10)
             ax[methods.index(m)].set_ylim(0, 1)
-            ax[methods.index(m)].set_ylabel(method_labels[methods.index(m)])
+            ax[methods.index(m)].set_ylabel(m.upper())
         plt.tight_layout()
         plt.savefig(f'output/visualization/{d}/{fname[:-4]}.png')
         plt.close()
