@@ -740,7 +740,7 @@ def sample_subseries(X, n, k):
     k: length of subseries
     """
     length = X.shape[0]
-    start_points = np.random.randint(0, length-k, n)
+    # start_points = np.random.randint(0, length-k, n)
     start_points = np.linspace(0, length-k, n, dtype=int)
     segments = [X[sp:sp+k] for sp in start_points]
     return segments

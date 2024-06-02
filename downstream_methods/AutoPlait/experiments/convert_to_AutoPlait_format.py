@@ -5,6 +5,7 @@ This script converts data to the format required by AutoPlait.
 
 import os
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 datasets = ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']
 methods = ['pca', 'umap', 'issd', 'ecp', 'ecs', 'lda', 'sfm']
@@ -23,6 +24,7 @@ for d in datasets:
             data = np.load(os.path.join(original_path, fname), allow_pickle=True)
             label = data[:,-1].astype(int)
             data = data[:,:-1]
+            data = StandardScaler().fit_transform(data)
             np.savetxt(os.path.join(output_path, fname.replace('.npy', '.txt')),
                        data,
                        delimiter='\t',
@@ -30,7 +32,6 @@ for d in datasets:
             num_cols_list.append(data.shape[1])
         fname_list = [f'data/{d}/{m}/{fname[:-4]}.txt\n' for fname in fname_list]
         with open(os.path.join(output_path, 'list'), 'w') as f:
-            # f.write(f'data/{d}/{m}/{fname[:-4]}.txt\n')
             f.writelines(fname_list)
         with open(os.path.join(output_path, 'info'), 'w') as f:
             f.write('\n'.join([str(num_cols) for num_cols in num_cols_list]))

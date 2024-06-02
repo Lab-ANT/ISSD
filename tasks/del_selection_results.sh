@@ -10,3 +10,6 @@ for dataset in ${dataset_list[@]}; do
         rm -rf data/$dataset/$method
     done
 done
+
+rm -rf downstream_methods/AutoPlait/data
+rm -rf downstream_methods/AutoPlait/output
