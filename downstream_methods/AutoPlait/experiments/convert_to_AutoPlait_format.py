@@ -16,7 +16,7 @@ for d in datasets:
         original_path = f'data/{d}/{m}'
         output_path = f'downstream_methods/AutoPlait/data/{d}/{m}'
         os.makedirs(output_path, exist_ok=True)
-        fname_list = os.listdir(f'data/{d}/{m}')
+        fname_list = os.listdir(f'data/{d}/raw')
         fname_list.sort()
         num_cols_list = []
         for fname in fname_list:

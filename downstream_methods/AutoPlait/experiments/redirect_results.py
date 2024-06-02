@@ -44,7 +44,7 @@ for d in datasets:
         temp_path = f'downstream_methods/AutoPlait/data/{d}/{m}'
         output_path = f'output/results/autoplait/{d}/{m}'
         os.makedirs(output_path, exist_ok=True)
-        fname_list = os.listdir(f'data/{d}/{m}')
+        fname_list = os.listdir(f'data/{d}/raw')
         fname_list.sort()
         for i, fname in enumerate(fname_list):
             data = np.load(os.path.join(original_path, fname), allow_pickle=True)
