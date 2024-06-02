@@ -107,6 +107,7 @@ def issd(indicators, state_seq, K,
     """
 
     indicators = indicators.copy()
+    indicators = moving_average(indicators, window_size=10)
     # PARAMS CHECK
     if strategy not in ['cf', 'qf']:
         raise ValueError('strategy must be cf or qf.')

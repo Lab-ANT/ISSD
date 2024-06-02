@@ -15,6 +15,22 @@ from sklearn.neighbors import KDTree, BallTree
 # from sklearn.metrics import accuracy_score
 # from sklearn.neighbors import KNeighborsClassifier
 
+def is_constant(signal, tolerance=1e-5):
+    return np.all(np.abs(np.diff(signal)) < tolerance)
+
+def moving_average(signal, window_size=3):
+    num_channels = signal.shape[1]
+    channels = []
+    for i in range(num_channels):
+        if is_constant(signal[:, i]):
+            # skip constant channel
+            channels.append(signal[:, i])
+            continue
+        filtered = np.convolve(signal[:, i], np.ones(window_size) / window_size, mode='same')
+        channels.append(filtered)
+    signal = np.column_stack(channels)
+    return signal
+
 def reorder_label(label):
     # Start from 0.
     label = np.array(label)
@@ -24,8 +40,8 @@ def reorder_label(label):
         label[idx] = i
     return label.astype(int)
 
-# def inte_from_model_selection(dataset, method, fname, K):
-#     fname_list, result_list = load_selection_result_from_txt(f'output/selection/select_from_model/{method}_{dataset}.txt')
+# def inte_from_txt(dataset, method, fname, K):
+#     fname_list, result_list = load_selection_result_from_txt(f'output/selection/{dataset}_{method}.txt')
 #     idx = fname_list.index(fname)
 #     # remove by index
 #     fname_list.pop(idx)
@@ -33,23 +49,74 @@ def reorder_label(label):
 #     result = majority_vote_on_results(result_list, K)
 #     return result
 
-def inte_from_txt(dataset, method, fname, K):
-    fname_list, result_list = load_selection_result_from_txt(f'output/selection/{dataset}_{method}.txt')
-    idx = fname_list.index(fname)
-    # remove by index
-    fname_list.pop(idx)
-    result_list.pop(idx)
-    result = majority_vote_on_results(result_list, K)
-    return result
-
 def majority_vote_on_results(result_list, K):
     results = np.array(result_list).flatten()
     elems, cnt = np.unique(results, return_counts=True)
     result = elems[np.argsort(cnt)[::-1][:K]]
     return result
 
+def inte_issd_v3(dataset, K, fname_list):
+    fname_list = [fname[:-4] for fname in fname_list]
+    fname_list.sort()
+    channel_matirces = []
+    channel_interval = []
+    for fname in fname_list:
+        matrices = np.load(f'output/issd-cf/{dataset}/{fname}/matrices.npy')
+        max_inner = np.load(f'output/issd-cf/{dataset}/{fname}/max_inner.npy')
+        mean_inter = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inter.npy')
+        mean_inner = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inner.npy')
+        interval = mean_inter - mean_inner
+        channel_interval.append(interval)
+        indicator_matrices = [m>tau for m, tau in zip(matrices, max_inner)]
+        channel_matirces.append(indicator_matrices)
+    channel_interval = np.array(channel_interval).mean(axis=0)
+    per_channel_list = []
+    num_channels = channel_interval.shape[0]
+    num_ts = len(fname_list)
+    for i in range(num_channels):
+        list1 = []
+        for j in range(num_ts):
+            list1.append(channel_matirces[j][i].copy().flatten())
+        per_channel_list.append(np.concatenate(list1))
+
+    masked_idx = np.array([False]*len(per_channel_list))
+    per_channel_list = np.array(per_channel_list)
+    selected_channels = []
+
+    complete_score_list = []
+    quality_score_list = []
+
+    current_cost = 0
+    current_quality = 0
+    cnt = 1
+
+    current_matrix = np.zeros(per_channel_list[0].shape).astype(bool)
+    while len(selected_channels) < K:
+        remaining_idx = np.argwhere(~masked_idx).flatten()
+        costlist = np.array([cost(m, current_matrix) for m in per_channel_list])
+        candidate_c = np.max(costlist[remaining_idx])
+
+        candidate_idx = remaining_idx[np.argwhere(costlist[remaining_idx]==candidate_c).flatten()]
+        idx = candidate_idx[np.argmax(channel_interval[candidate_idx])]
+
+        current_cost += candidate_c
+        current_quality += channel_interval[idx]
+        complete_score_list.append(current_cost)
+        # quality_score_list.append(current_quality/cnt)
+        quality_score_list.append(channel_interval[idx])
+        cnt+=1
+        
+        selected_channels.append(idx)
+        masked_idx[idx] = True
+        current_matrix = matrix_OR(per_channel_list[selected_channels])
+    quality_score_list = np.array(quality_score_list)
+    complete_score_list = np.array(complete_score_list)
+    np.save(f'qscore.npy', quality_score_list)
+    np.save(f'cscore.npy', complete_score_list)
+    print(selected_channels)
+    return selected_channels
+
 def inte_issd_v2(dataset, K, fname_list, strategy):
-    # the result of fname will be excluded.
     if strategy == 'qf':
         fname_list = [fname[:-4] for fname in fname_list]
         fname_list.sort()

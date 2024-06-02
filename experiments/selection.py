@@ -71,9 +71,8 @@ def mutual_info_selector(data, state_seq, n_components):
 if method == 'issd':
     # precompute statistics for all time series
     for fname in tqdm.tqdm(fname_list):
-        data = np.load(os.path.join(raw_data_path, fname), allow_pickle=True)
-        label = data[:,-1].astype(int)
-        data = data[:,:-1]
+        data, label = load_data(os.path.join(raw_data_path, fname))
+        num_channels = data.shape[1]
         result = issd(data,
                     label,
                     n_components,
@@ -100,6 +99,7 @@ if method == 'issd':
 
         selected_channels_qf = inte_issd_v2(dataset, n_components, fname_list_train, 'qf')
         selected_channels_cf = inte_issd_v2(dataset, n_components, fname_list_train, 'cf')
+        # inte_issd_v3(dataset, num_channels, fname_list_train)
 
         print(f'qf: {selected_channels_qf}')
         print(f'cf: {selected_channels_cf}')
@@ -109,13 +109,13 @@ if method == 'issd':
         for fname in fname_list_train:
             data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
             reduced_data_issd_qf = data[:,selected_channels_qf]
-            lda_issd_qf = LinearDiscriminantAnalysis().fit_transform(reduced_data_issd_qf, state_seq)
-            score_qf += mutual_info_regression(lda_issd_qf, state_seq)[0]
+            lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+            score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
 
             data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
             reduced_data_issd_cf = data[:,selected_channels_cf]
-            lda_issd_cf = LinearDiscriminantAnalysis().fit_transform(reduced_data_issd_cf, state_seq)
-            score_cf+=mutual_info_regression(lda_issd_cf, state_seq)[0]
+            lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+            score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
         s_qf = score_qf
         s_cf = score_cf
         if s_qf >= s_cf:
@@ -145,9 +145,7 @@ elif method == 'sfs':
 
         selected_channels_for_each_ts = []
         for fname in tqdm.tqdm(fname_list_train):
-            data = np.load(os.path.join(raw_data_path, fname), allow_pickle=True)
-            label = data[:,-1].astype(int)
-            data = data[:,:-1]
+            data, label = load_data(os.path.join(raw_data_path, fname))
             # PAMAP2 is too large for sfs, requires 5x downsampling
             if dataset == 'PAMAP2':
                 data = data[::5]
