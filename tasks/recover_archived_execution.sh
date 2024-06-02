@@ -7,7 +7,7 @@ method_list=(issd pca umap ecs ecp lda sfm)
 
 for dataset in ${dataset_list[@]}; do
   for method in ${method_list[@]}; do
-    cp -r archive/execution$execution_num/data/$dataset/$method data/$dataset/$method
+    cp -r archive/execution$execution_num/data/$dataset/$method data/$dataset
   done
 done
 
