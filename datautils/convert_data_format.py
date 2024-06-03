@@ -71,10 +71,6 @@ for i in range(1,3):
     # cut data and label into two parts
     data = np.concatenate((data, labels), axis=1)
     np.save(f'data/ActRecTut/raw/subject{i}_walk.npy', data)
-    # data1 = data[:int(data.shape[0]/2)]
-    # data2 = data[int(data.shape[0]/2):]
-    # np.save(f'data/ActRecTut/raw/subject{i}_walk1.npy', data1)
-    # np.save(f'data/ActRecTut/raw/subject{i}_walk2.npy', data2)
 
 # PAMAP2
 data_path = 'data/raw/PAMAP2/Protocol'
