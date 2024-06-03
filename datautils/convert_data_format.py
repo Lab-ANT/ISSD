@@ -5,6 +5,7 @@ Convert data format for all datasets for easy handling.
 import scipy
 import os
 import numpy as np
+# import pandas as pd
 
 def seg_to_label(label):
     pre = 0
@@ -50,6 +51,17 @@ def load_PAMAP2(path):
     data = data[:,2:]
     data = fill_nan(data)
     return data, state_seq
+
+# Pump
+# data_path = 'data/raw/Pump'
+# os.makedirs('data/Pump/raw', exist_ok=True)
+# for i in range(8):
+#     df = pd.read_csv(f'data/raw/Pump/Pump_A_DC35_{i}.csv', sep=',')
+#     # Sensor 1-9 is the data, State is the lable, t is the time
+#     data = df.iloc[:,1:10].values
+#     label = df['State'].values
+#     data = np.concatenate((data, label.reshape(-1,1)), axis=1)
+#     np.save(f'data/Pump/raw/Pump_A_DC35_{i}.npy', data)
 
 # USC-HAD
 data_path = 'data/raw'

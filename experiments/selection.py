@@ -50,8 +50,6 @@ os.makedirs(data_output_path, exist_ok=True)
 # selection_output_path = f'output/selection/' # path to save the selected channels idx
 # os.makedirs(selection_output_path, exist_ok=True)
 
-if dataset not in ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']:
-    raise ValueError(f'Unsupported dataset: {dataset}, the dataset should be [MoCap|SynSeg|ActRecTut|PAMAP2|USC-HAD]')
 if method not in ['issd', 'issd-qf', 'issd-cf', 'mi', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap', 'sfs']:
     raise ValueError(f'Unsupported method: {method}')
 
