@@ -33,8 +33,6 @@ if dmethod not in ['time2state', 'ticc', 'e2usd']:
 
 f_list = os.listdir(os.path.join(script_path, f'../data/{dataset}/raw/'))
 f_list = list(f_list)
-# output_path = os.path.join(script_path, f'../output/sfm/{dmethod}/{dataset}/')
-# os.makedirs(output_path, exist_ok=True)
 
 overall_score_list = []
 for fname in f_list:

@@ -26,7 +26,7 @@ dataset = args.dataset
 
 script_path = os.path.dirname(__file__)
 
-if dmethod not in ['time2state', 'ticc', 'e2usd']:
+if dmethod not in ['time2state', 'e2usd']:
     print('The downstream method does not exist. Please check the downstream method name.')
     exit()
 
