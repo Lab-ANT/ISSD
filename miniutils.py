@@ -12,8 +12,8 @@ import os
 import numpy as np
 import math
 from sklearn.neighbors import KDTree, BallTree
-# from sklearn.metrics import accuracy_score
-# from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.neighbors import KNeighborsClassifier
 
 def is_constant(signal, tolerance=1e-5):
     return np.all(np.abs(np.diff(signal)) < tolerance)
@@ -115,6 +115,61 @@ def inte_issd_v3(dataset, K, fname_list):
     np.save(f'cscore.npy', complete_score_list)
     print(selected_channels)
     return selected_channels
+
+def inte_issd_new(dataset, K, fname_list, strategy):
+    if strategy == 'qf':
+        fname_list = [fname[:-4] for fname in fname_list]
+        fname_list.sort()
+        interval_list = []
+        for fname in fname_list:
+            mean_inner = np.load(f'output/issd-qf/{dataset}/{fname}/mean_inner.npy')
+            mean_inter = np.load(f'output/issd-qf/{dataset}/{fname}/mean_inter.npy')
+            interval_list.append(mean_inter-mean_inner)
+        interval_list = np.array(interval_list)
+        interval_list = np.mean(interval_list, axis=0)
+        return list(np.argsort(interval_list)[::-1][:K])
+    elif strategy == 'cf':
+        fname_list = [fname[:-4] for fname in fname_list]
+        fname_list.sort()
+        channel_matirces = []
+        channel_interval = []
+        for fname in fname_list:
+            matrices = np.load(f'output/issd-cf/{dataset}/{fname}/matrices.npy')
+            max_inner = np.load(f'output/issd-cf/{dataset}/{fname}/max_inner.npy')
+            mean_inter = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inter.npy')
+            mean_inner = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inner.npy')
+            interval = mean_inter - mean_inner
+            channel_interval.append(interval)
+            indicator_matrices = [m>tau for m, tau in zip(matrices, max_inner)]
+            channel_matirces.append(indicator_matrices)
+        channel_interval = np.array(channel_interval).mean(axis=0)
+        per_channel_list = []
+        num_channels = channel_interval.shape[0]
+        num_ts = len(fname_list)
+        for i in range(num_channels):
+            list1 = []
+            for j in range(num_ts):
+                list1.append(channel_matirces[j][i].copy().flatten())
+            per_channel_list.append(np.concatenate(list1))
+
+        masked_idx = np.array([False]*len(per_channel_list))
+        per_channel_list = np.array(per_channel_list)
+        selected_channels = []
+        # idx = np.argmax(channel_interval)
+        # selected_channels.append(idx)
+        # masked_idx[idx] = True
+        # current_matrix = matrix_OR(per_channel_list[selected_channels])
+        current_matrix = np.zeros(per_channel_list[0].shape).astype(bool)
+        while len(selected_channels) < K:
+            remaining_idx = np.argwhere(~masked_idx).flatten()
+            costlist = np.array([cost(m, current_matrix) for m in per_channel_list])
+            candidate_c = np.max(costlist[remaining_idx])
+            candidate_idx = remaining_idx[np.argwhere(costlist[remaining_idx]==candidate_c).flatten()]
+            idx = candidate_idx[np.argmax(channel_interval[candidate_idx])]
+            selected_channels.append(idx)
+            masked_idx[idx] = True
+            current_matrix = matrix_OR(per_channel_list[selected_channels])
+        return selected_channels
 
 def inte_issd_v2(dataset, K, fname_list, strategy):
     if strategy == 'qf':
@@ -686,20 +741,6 @@ def exclude_trival_segments(state_seq, exclude_lenth):
     non_trival_idx = np.concatenate(segs)
     return non_trival_idx
 
-# def sample_subseries(X, n, k):
-#     """
-#     sample n random subseries from x.
-#     X: time series sample
-#     n: num of subseries
-#     k: length of subseries
-#     """
-#     length = X.shape[0]
-#     # start_points = np.random.randint(0, length-k, n)
-#     start_points = np.unique(np.linspace(0, length-k, n, dtype=int))
-#     # start_points = np.linspace(0, length-k, n, dtype=int)
-#     segments = [X[sp:sp+k] for sp in start_points]
-#     return segments
-
 # def nn_test(sample1, sample2, n, k):
 #     """
 #     sample1: time series sample
@@ -742,9 +783,42 @@ def sample_subseries(X, n, k):
     length = X.shape[0]
     # start_points = np.random.randint(0, length-k, n)
     start_points = np.linspace(0, length-k, n, dtype=int)
+    # start_points = np.unique(np.linspace(0, length-k, n, dtype=int))
     segments = [X[sp:sp+k] for sp in start_points]
     return segments
 
+def nn_test_clf(sample1, sample2, n, k, nnmethod='ball'):
+    """
+    sample1: time series sample
+    sample2: time series sample
+    n: num of subseries
+    k: length of subseries
+    nnmethod: nearest neighbor query method, 'ball' or 'kd'
+    """
+    A1 = sample_subseries(sample1, n, k)
+    A2 = sample_subseries(sample2, n, k)
+    A1 = [e.flatten() for e in A1]
+    A2 = [e.flatten() for e in A2]
+    p = n*2
+    r = int(math.log(p))
+    A = A1 + A2
+    T_rp = 0
+    # constract label
+    label = np.zeros(p)
+    label[n:] = 1
+    knn = KNeighborsClassifier(n_neighbors=r)
+    knn.fit(A, label)
+    A1 = sample_subseries(sample1, n, k)
+    A2 = sample_subseries(sample2, n, k)
+    A1 = [e.flatten() for e in A1]
+    A2 = [e.flatten() for e in A2]
+    A = A1 + A2
+    label = np.zeros(p)
+    label[n:] = 1
+    prediction = knn.predict(A)
+    T_rp = accuracy_score(label, prediction)
+    return T_rp
+    
 def nn_test(sample1, sample2, n, k, nnmethod='ball'):
     """
     sample1: time series sample

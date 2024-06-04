@@ -109,18 +109,25 @@ if method == 'issd':
             reduced_data_issd_qf = data[:,selected_channels_qf]
             lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
             score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
+            # lda_issd_qf = PCA(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+            # score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
+            # score_qf += np.sum(mutual_info_regression(reduced_data_issd_qf, state_seq))
 
             data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
             reduced_data_issd_cf = data[:,selected_channels_cf]
             lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
             score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
+            # lda_issd_cf = PCA(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+            # score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
+            # score_cf += np.sum(mutual_info_regression(reduced_data_issd_cf, state_seq))
+
         s_qf = score_qf
         s_cf = score_cf
         if s_qf >= s_cf:
             selected_channels = selected_channels_qf
         else:
             selected_channels = selected_channels_cf
-
+        
         for fname in fname_list_test:
             print('issd', s_qf, s_cf, fname)
             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
