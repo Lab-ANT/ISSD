@@ -529,6 +529,8 @@ def search_thresholds(matrices, true_matrix):
     inter_tau_list = []
     inner_mean_tau_list = []
     inter_mean_tau_list = []
+    inner_std_list = []
+    inter_std_list = []
     idx_inner = np.argwhere(true_matrix==True)
     idx_inter = np.argwhere(true_matrix==False)
     # exclude the diagonal
@@ -540,10 +542,14 @@ def search_thresholds(matrices, true_matrix):
         inter_tau_list.append(np.min(matrices[i][idx_inter[:,0], idx_inter[:,1]]))
         inner_mean_tau_list.append(np.mean(matrices[i][idx_inner[:,0], idx_inner[:,1]]))
         inter_mean_tau_list.append(np.mean(matrices[i][idx_inter[:,0], idx_inter[:,1]]))
+        inner_std_list.append(np.std(matrices[i][idx_inner[:,0], idx_inner[:,1]]))
+        inter_std_list.append(np.std(matrices[i][idx_inter[:,0], idx_inter[:,1]]))
     return np.array(inner_tau_list),\
            np.array(inter_tau_list),\
            np.array(inner_mean_tau_list),\
-           np.array(inter_mean_tau_list)
+           np.array(inter_mean_tau_list),\
+           np.array(inner_std_list),\
+           np.array(inter_std_list)
 
 def compact_matrix(state_seq):
     elems, counts = np.unique(state_seq, return_counts=True)
@@ -741,38 +747,6 @@ def exclude_trival_segments(state_seq, exclude_lenth):
     non_trival_idx = np.concatenate(segs)
     return non_trival_idx
 
-# def nn_test(sample1, sample2, n, k):
-#     """
-#     sample1: time series sample
-#     sample2: time series sample
-#     n: num of subseries
-#     k: length of subseries
-#     """
-#     A1 = sample_subseries(sample1, n, k)
-#     A2 = sample_subseries(sample2, n, k)
-#     A1 = [e.flatten() for e in A1]
-#     A2 = [e.flatten() for e in A2]
-#     # p = n*2
-#     n1 = len(A1)
-#     n2 = len(A2)
-#     p = n1 + n2
-#     r = int(math.log(p))
-#     if r == 0:
-#         r = 1
-#     A = A1 + A2
-#     T_rp = 0
-#     # construct KDTree
-#     tree = KDTree(A, metric='euclidean', leaf_size=10)
-#     for i in range(p):
-#         dist, idx = tree.query(A[i].reshape(1,-1), k=r+1)
-#         idx = idx[0]
-#         for j in range(r):
-#             if (i < n1 and idx[j+1] < n1) or (i >= n1 and idx[j+1] >= n1):
-#                 T_rp += 1
-#             else:
-#                 continue
-#     return T_rp/(p*r)
-
 def sample_subseries(X, n, k):
     """
     sample n random subseries from x.
@@ -786,38 +760,6 @@ def sample_subseries(X, n, k):
     # start_points = np.unique(np.linspace(0, length-k, n, dtype=int))
     segments = [X[sp:sp+k] for sp in start_points]
     return segments
-
-def nn_test_clf(sample1, sample2, n, k, nnmethod='ball'):
-    """
-    sample1: time series sample
-    sample2: time series sample
-    n: num of subseries
-    k: length of subseries
-    nnmethod: nearest neighbor query method, 'ball' or 'kd'
-    """
-    A1 = sample_subseries(sample1, n, k)
-    A2 = sample_subseries(sample2, n, k)
-    A1 = [e.flatten() for e in A1]
-    A2 = [e.flatten() for e in A2]
-    p = n*2
-    r = int(math.log(p))
-    A = A1 + A2
-    T_rp = 0
-    # constract label
-    label = np.zeros(p)
-    label[n:] = 1
-    knn = KNeighborsClassifier(n_neighbors=r)
-    knn.fit(A, label)
-    A1 = sample_subseries(sample1, n, k)
-    A2 = sample_subseries(sample2, n, k)
-    A1 = [e.flatten() for e in A1]
-    A2 = [e.flatten() for e in A2]
-    A = A1 + A2
-    label = np.zeros(p)
-    label[n:] = 1
-    prediction = knn.predict(A)
-    T_rp = accuracy_score(label, prediction)
-    return T_rp
     
 def nn_test(sample1, sample2, n, k, nnmethod='ball'):
     """

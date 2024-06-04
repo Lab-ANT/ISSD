@@ -9,7 +9,7 @@ from miniutils import *
 import multiprocessing
 from sklearn.preprocessing import StandardScaler
 
-def selection_strategy_cf(min_inter, max_inner, mean_inter, mean_inner, cluster, matrices, true_matrix, K):
+def selection_strategy_cf(min_inter, max_inner, mean_inter, mean_inner, std_inner, std_inter, cluster, matrices, true_matrix, K):
     """
     An equivalent implementation of the algorithm in the paper.
     """
@@ -18,7 +18,7 @@ def selection_strategy_cf(min_inter, max_inner, mean_inter, mean_inner, cluster,
     indicator_matrices = np.array([m>tau for m, tau in zip(matrices, max_inner)])
 
     masked_idx = np.array([False]*len(min_inter))
-    mean_interval = mean_inter-mean_inner
+    mean_interval = mean_inter-mean_inner-std_inner-std_inter
     
     selection_results = []
     # COMPLETENESS GUARANTEE
@@ -43,7 +43,7 @@ def selection_strategy_cf(min_inter, max_inner, mean_inter, mean_inner, cluster,
 
     return selection_results, indicator_matrices
 
-def selection_strategy_qf(min_inter, max_inner, mean_inter, mean_inner, cluster, matrices, true_matrix, K):
+def selection_strategy_qf(min_inter, max_inner, mean_inter, mean_inner, std_inner, std_inter, cluster, matrices, true_matrix, K):
     """
     An equivalent implementation of the algorithm in the paper.
     """
@@ -51,7 +51,7 @@ def selection_strategy_qf(min_inter, max_inner, mean_inter, mean_inner, cluster,
 
     masked_idx = np.array([False]*len(min_inter))
     selection_results = []
-    mean_interval = mean_inter-mean_inner
+    mean_interval = mean_inter-mean_inner-std_inner-std_inter
 
     while len(selection_results) < K:
         remaining_idx = np.argwhere(~masked_idx).flatten()
@@ -173,16 +173,18 @@ def issd(indicators, state_seq, K,
         matrices = np.stack(matrices)
 
     # SEARCH THRESHOLD
-    max_inner, min_inter, mean_inner, mean_inter = search_thresholds(matrices, true_matrix)
+    max_inner, min_inter, mean_inner, mean_inter, std_inner, std_inter = search_thresholds(matrices, true_matrix)
     # compact_true_matrix = compact_matrix(state_seq)
     if strategy == 'qf':
         result, indicator_matrices = selection_strategy_qf(min_inter, max_inner,
                                                            mean_inter, mean_inner,
+                                                           std_inner, std_inter,
                                                            cluster, matrices,
                                                            true_matrix, K)
     else: # cf
         result, indicator_matrices = selection_strategy_cf(min_inter, max_inner,
                                                            mean_inter, mean_inner,
+                                                           std_inner, std_inter,
                                                            cluster, matrices,
                                                            true_matrix, K)
 
