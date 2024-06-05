@@ -95,8 +95,10 @@ if method == 'issd':
             fname_list_train = part2_list
             fname_list_test = part1_list
 
-        selected_channels_qf = inte_issd_v2(dataset, n_components, fname_list_train, 'qf')
-        selected_channels_cf = inte_issd_v2(dataset, n_components, fname_list_train, 'cf')
+        selected_channels_qf = inte_issd(dataset, n_components, fname_list_train, 'qf')
+        selected_channels_cf = inte_issd(dataset, n_components, fname_list_train, 'cf')
+        # selected_channels_qf = inte_issd_v2(dataset, n_components, fname_list_train, 'qf')
+        # selected_channels_cf = inte_issd_v2(dataset, n_components, fname_list_train, 'cf')
         # inte_issd_v3(dataset, num_channels, fname_list_train)
 
         print(f'qf: {selected_channels_qf}')
@@ -127,12 +129,16 @@ if method == 'issd':
             selected_channels = selected_channels_qf
         else:
             selected_channels = selected_channels_cf
+        selected_channels = selected_channels_cf
         
+        os.makedirs(data_output_path+'-qf', exist_ok=True)
+        os.makedirs(data_output_path+'-cf', exist_ok=True)
         for fname in fname_list_test:
             print('issd', s_qf, s_cf, fname)
             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
-            data = data[:,selected_channels+[-1]]
-            np.save(f'data/{dataset}/issd/{fname}', data)
+            np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
+            np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
+            np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
 
 elif method == 'sfs':
     # devide the dataset into two parts
