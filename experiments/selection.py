@@ -129,7 +129,7 @@ if method == 'issd':
             selected_channels = selected_channels_qf
         else:
             selected_channels = selected_channels_cf
-        selected_channels = selected_channels_cf
+        selected_channels = selected_channels_qf
         
         os.makedirs(data_output_path+'-qf', exist_ok=True)
         os.makedirs(data_output_path+'-cf', exist_ok=True)

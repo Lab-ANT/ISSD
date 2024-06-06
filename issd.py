@@ -192,6 +192,7 @@ def issd(indicators, state_seq, K,
         # save matrices
         np.save(os.path.join(save_path, 'matrices.npy'), matrices)
         np.save(os.path.join(save_path, 'true_matrix.npy'), true_matrix)
+        np.save(os.path.join(save_path, 'corr_matrix.npy'), corr_matrix)
         # save intervals
         np.save(os.path.join(save_path, 'min_inter.npy'), min_inter)
         np.save(os.path.join(save_path, 'max_inner.npy'), max_inner)

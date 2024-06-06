@@ -45,7 +45,7 @@ def majority_vote_on_results(result_list, K):
     result = elems[np.argsort(cnt)[::-1][:K]]
     return result
 
-def inte_issd(dataset, K, fname_list, strategy):
+def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
     fname_list = [fname[:-4] for fname in fname_list]
     if strategy == 'qf':
         # original version
@@ -60,11 +60,14 @@ def inte_issd(dataset, K, fname_list, strategy):
         # new version
         matrices = []
         true_matrices = []
+        corr_matrices = []
         for fname in fname_list:
             channel_matrices = np.load(f'output/issd-cf/{dataset}/{fname}/matrices.npy') # (num_channels, num_segs, num_segs)
             true_matrix = np.load(f'output/issd-cf/{dataset}/{fname}/true_matrix.npy') # (num_segs, num_segs)
+            corr_matrix = np.load(f'output/issd-cf/{dataset}/{fname}/corr_matrix.npy') # (num_channels, num_channels)
             channel_matrices = channel_matrices.reshape(channel_matrices.shape[0], -1) # flatten 1,2 dim
             matrices.append(channel_matrices)
+            corr_matrices.append(corr_matrix)
             true_matrices.append(true_matrix.flatten())
         if len(fname_list) == 1:
             matrices = matrices[0]
@@ -72,13 +75,29 @@ def inte_issd(dataset, K, fname_list, strategy):
         else:
             matrices = np.hstack(matrices)
             true_matrices = np.hstack(true_matrices)
-        print(matrices.shape, true_matrices.shape)
+        corr_matrices = np.array(corr_matrices).mean(axis=0)
+        clusters = cluster_corr(corr_matrices, threshold=clustering_threshold)
+        print(matrices.shape, true_matrices.shape, corr_matrices.shape)
         idx_inner = np.argwhere(true_matrices==True)
         idx_inter = np.argwhere(true_matrices==False)
         mean_inner = np.mean(matrices[:,idx_inner], axis=1).flatten()
         mean_inter = np.mean(matrices[:,idx_inter], axis=1).flatten()
         interval = mean_inter - mean_inner
-        return list(np.argsort(-interval)[:K])
+
+        selected_channels = []
+        masked_idx = np.array([False]*len(mean_inner))
+        while len(selected_channels) < K:
+            remaining_idx = np.argwhere(~masked_idx).flatten()
+            if len(remaining_idx) == 0:
+                print('No more channels to select.')
+                break
+            # select the idx with the maximum mean interval
+            idx = remaining_idx[np.argmax(interval[remaining_idx])]
+            selected_channels.append(idx)
+            # mask the idx and the idx with the same cluster
+            masked_idx[idx] = True
+            masked_idx[clusters==clusters[idx]] = True
+        return selected_channels
     # elif strategy == 'cf':
     #     channel_matirces = []
     #     channel_interval = []
