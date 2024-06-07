@@ -10,6 +10,14 @@ echo "Max cores to use: $max_cores"
 method_list=(issd pca umap ecs ecp lda sfm)
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
 
+# check if the argument is specified,
+# if specified, run the specified method only
+if [ -n "$1" ]; then
+  method_list=($1)
+fi
+echo "Method list: ${method_list[@]}"
+
+# convert the dataset to AutoPlait format
 python downstream_methods/AutoPlait/experiments/convert_to_AutoPlait_format.py
 cd downstream_methods/AutoPlait
 
