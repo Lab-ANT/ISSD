@@ -17,7 +17,7 @@ python datautils/convert_data_format.py
 ```
 
 ## Environments
-We strongly recommend configuring the environments separately for selection/reduction methods and downstream methods to avoid conflicts. Please prepare two virtual environments and install the following requirements separately:
+We strongly recommend configuring the environments separately for selection/reduction methods and downstream methods to avoid conflicts. Please prepare two virtual environments and install the following requirements separately.
 ```
 # selection/reduction environment
 conda create -n selection python=3.6
