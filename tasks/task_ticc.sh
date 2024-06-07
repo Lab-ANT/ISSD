@@ -2,7 +2,7 @@
 
 # list of methods to run
 method_list=(issd pca umap ecs ecp lda sfm)
-dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
+dataset_list=(PAMAP2 USC-HAD MoCap ActRecTut SynSeg)
 
 # check if the argument is specified,
 # if specified, run the specified method only
