@@ -1,6 +1,7 @@
 #!/bin/bash
 
 execution_num=$1
+specified_method=$2
 
 # activate conda
 source ~/anaconda3/etc/profile.d/conda.sh
@@ -18,10 +19,10 @@ conda activate downstream
 echo "current environment: $CONDA_DEFAULT_ENV"
 
 # sequentially run all tasks
-bash tasks/task_autoplait.sh > output/log_autoplait.out
-bash tasks/task_time2state.sh > output/log_time2state.out
-bash tasks/task_e2usd.sh > output/log_e2usd.out
-bash tasks/task_ticc.sh > output/log_ticc.out
+bash tasks/task_autoplait.sh $specified_method > output/log_autoplait.out
+bash tasks/task_time2state.sh $specified_method > output/log_time2state.out
+bash tasks/task_e2usd.sh $specified_method > output/log_e2usd.out
+bash tasks/task_ticc.sh $specified_method > output/log_ticc.out
 
 # redirect results for AutoPlait
 python downstream_methods/AutoPlait/experiments/redirect_results.py
