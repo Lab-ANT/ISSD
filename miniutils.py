@@ -99,10 +99,10 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
             masked_idx[clusters==clusters[idx]] = True
         return selected_channels
     # elif strategy == 'cf':
-    #     channel_matirces = []
-    #     channel_interval = []
+    #     matrices = []
+    #     true_matrices = []
     #     for fname in fname_list:
-    #         matrices = np.load(f'output/issd-cf/{dataset}/{fname}/matrices.npy')
+    #         channel_matrices = np.load(f'output/issd-cf/{dataset}/{fname}/matrices.npy')
     #         max_inner = np.load(f'output/issd-cf/{dataset}/{fname}/max_inner.npy')
     #         mean_inter = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inter.npy')
     #         mean_inner = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inner.npy')
@@ -163,29 +163,56 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         max_inner = np.max(matrices[:,idx_inner], axis=1).flatten()
         min_inter = np.min(matrices[:,idx_inter], axis=1).flatten()
 
-        indicator_matrices = np.array([m>tau for m, tau in zip(matrices, max_inner)])
-        masked_idx = np.array([False]*len(indicator_matrices))
+        indicator_matrices = np.array([m<tau for m, tau in zip(matrices, min_inter)])
+        indicator_matrices2 = np.array([m>tau for m, tau in zip(matrices, max_inner)])
         completeness = np.array([count_true(m) for m in indicator_matrices])
-        selected_channels = []
-        selected_channels.append(np.argmax(completeness))
-        # selected_channels.append(np.argmax(interval))
-        masked_idx[selected_channels[0]] = True
+        completeness2 = np.array([count_true(m) for m in indicator_matrices2])
 
+        completeness = (completeness + completeness2)/2
+        
+        selected_channels = []
+        sorted_by_interval = np.argsort(-interval)
+        masked_idx = np.array([False]*len(indicator_matrices))
+        # mask half of the channels
+        masked_idx[sorted_by_interval[len(sorted_by_interval)//2:]] = True
+        remaining_idx = np.argwhere(~masked_idx).flatten()
+        # select the channel with the maximum completeness
+        selected_channels.append(remaining_idx[np.argmax(completeness[~masked_idx])])
+        masked_idx[selected_channels[0]] = True
         for i in range(K-1):
             remaining_idx = np.argwhere(~masked_idx).flatten()
-            # remaining_matrices = matrices[remaining_idx]
-            # plus current matrices
-            current_matrix = np.stack([matrices[idx] for idx in selected_channels]).sum(axis=0)
-            # print(current_matrix.shape)
-            # plus current matrices with remaining matrices
-            current_candidates = np.stack([current_matrix+matrices[idx] for idx in remaining_idx])
-            max_inner = np.max(current_candidates[:,idx_inner], axis=1).flatten()
-            candidate_indicator_matrices = np.array([m>tau for m, tau in zip(current_candidates, max_inner)])
-            candidate_completeness = np.array([count_true(m) for m in candidate_indicator_matrices])
-            idx = remaining_idx[np.argmax(candidate_completeness)]
-            selected_channels.append(idx)
-            masked_idx[idx] = True
+            candidate_idx = remaining_idx[np.argmax(completeness[remaining_idx])]
+            selected_channels.append(candidate_idx)
+            masked_idx[candidate_idx] = True
         return selected_channels
+
+        # indicator_matrices = np.array([m>tau for m, tau in zip(matrices, max_inner)])
+        # masked_idx = np.array([False]*len(indicator_matrices))
+        # completeness = np.array([count_true(m) for m in indicator_matrices])
+        # selected_channels = []
+        # selected_channels.append(np.argmax(completeness))
+        # # selected_channels.append(np.argmax(interval))
+        # masked_idx[selected_channels[0]] = True
+
+        # for i in range(K-1):
+        #     remaining_idx = np.argwhere(~masked_idx).flatten()
+        #     # remaining_matrices = matrices[remaining_idx]
+        #     # plus current matrices
+        #     current_matrix = np.stack([matrices[idx] for idx in selected_channels]).sum(axis=0)
+        #     # plus current matrices with remaining matrices
+        #     current_candidates = np.stack([current_matrix+matrices[idx] for idx in remaining_idx])
+        #     max_inner = np.max(current_candidates[:,idx_inner], axis=1).flatten()
+        #     candidate_indicator_matrices = np.array([m>tau for m, tau in zip(current_candidates, max_inner)])
+        #     candidate_completeness = np.array([count_true(m) for m in candidate_indicator_matrices])
+        #     # print(candidate_completeness)
+        #     # if there are more than one candidate with the same completeness, select the one with the maximum interval
+        #     idx = remaining_idx[np.argmax(candidate_completeness)]
+        #     print('max completeness', np.max(candidate_completeness))
+        #     if len(np.argwhere(candidate_completeness==np.max(candidate_completeness)).flatten()) > 1:
+        #         idx = remaining_idx[np.argmax(interval[remaining_idx])]
+        #     selected_channels.append(idx)
+        #     masked_idx[idx] = True
+        # return selected_channels
 
 def load_selection_result_from_txt(path):
     with open(path, 'r') as f:
