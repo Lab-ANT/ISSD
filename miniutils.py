@@ -7,7 +7,6 @@ from scipy import stats
 import scipy.cluster.hierarchy as sch
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import numpy as np
 import math
 from sklearn.neighbors import KDTree, BallTree
@@ -98,46 +97,6 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
             masked_idx[idx] = True
             masked_idx[clusters==clusters[idx]] = True
         return selected_channels
-    # elif strategy == 'cf':
-    #     matrices = []
-    #     true_matrices = []
-    #     for fname in fname_list:
-    #         channel_matrices = np.load(f'output/issd-cf/{dataset}/{fname}/matrices.npy')
-    #         max_inner = np.load(f'output/issd-cf/{dataset}/{fname}/max_inner.npy')
-    #         mean_inter = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inter.npy')
-    #         mean_inner = np.load(f'output/issd-cf/{dataset}/{fname}/mean_inner.npy')
-    #         interval = mean_inter - mean_inner
-    #         channel_interval.append(interval)
-    #         indicator_matrices = [m>tau for m, tau in zip(matrices, max_inner)]
-    #         channel_matirces.append(indicator_matrices)
-    #     channel_interval = np.array(channel_interval).mean(axis=0)
-    #     per_channel_list = []
-    #     num_channels = channel_interval.shape[0]
-    #     num_ts = len(fname_list)
-    #     for i in range(num_channels):
-    #         list1 = []
-    #         for j in range(num_ts):
-    #             list1.append(channel_matirces[j][i].copy().flatten())
-    #         per_channel_list.append(np.concatenate(list1))
-
-    #     masked_idx = np.array([False]*len(per_channel_list))
-    #     per_channel_list = np.array(per_channel_list)
-    #     selected_channels = []
-    #     # idx = np.argmax(channel_interval)
-    #     # selected_channels.append(idx)
-    #     # masked_idx[idx] = True
-    #     # current_matrix = matrix_OR(per_channel_list[selected_channels])
-    #     current_matrix = np.zeros(per_channel_list[0].shape).astype(bool)
-    #     while len(selected_channels) < K:
-    #         remaining_idx = np.argwhere(~masked_idx).flatten()
-    #         costlist = np.array([cost(m, current_matrix) for m in per_channel_list])
-    #         candidate_c = np.max(costlist[remaining_idx])
-    #         candidate_idx = remaining_idx[np.argwhere(costlist[remaining_idx]==candidate_c).flatten()]
-    #         idx = candidate_idx[np.argmax(channel_interval[candidate_idx])]
-    #         selected_channels.append(idx)
-    #         masked_idx[idx] = True
-    #         current_matrix = matrix_OR(per_channel_list[selected_channels])
-    #     return selected_channels
     elif strategy == 'cf':
         matrices = []
         true_matrices = []
@@ -160,67 +119,82 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         mean_inter = np.mean(matrices[:,idx_inter], axis=1).flatten()
         interval = mean_inter - mean_inner
 
-        max_inner = np.max(matrices[:,idx_inner], axis=1).flatten()
-        min_inter = np.min(matrices[:,idx_inter], axis=1).flatten()
-
-        indicator_matrices = np.array([m<tau for m, tau in zip(matrices, min_inter)])
-        indicator_matrices2 = np.array([m>tau for m, tau in zip(matrices, max_inner)])
-        completeness = np.array([count_true(m) for m in indicator_matrices])
-        completeness2 = np.array([count_true(m) for m in indicator_matrices2])
-
-        completeness = (completeness + completeness2)/2
+        completeness, indicator_matrices = cal_completeness(matrices, true_matrices)
         
         selected_channels = []
-        sorted_by_interval = np.argsort(-interval)
-        masked_idx = np.array([False]*len(indicator_matrices))
-        # mask half of the channels
-        masked_idx[sorted_by_interval[len(sorted_by_interval)//2:]] = True
-        remaining_idx = np.argwhere(~masked_idx).flatten()
-        # select the channel with the maximum completeness
-        selected_channels.append(remaining_idx[np.argmax(completeness[~masked_idx])])
-        masked_idx[selected_channels[0]] = True
-        for i in range(K-1):
+        masked_idx = np.array([False]*len(mean_inner))
+        current_matrix = np.zeros(true_matrices.shape).astype(bool)
+
+        while len(selected_channels) < K:
             remaining_idx = np.argwhere(~masked_idx).flatten()
-            candidate_idx = remaining_idx[np.argmax(completeness[remaining_idx])]
-            selected_channels.append(candidate_idx)
-            masked_idx[candidate_idx] = True
+            if len(remaining_idx) == 0:
+                print('No more channels to select.')
+                break
+            cost_list = [cost(indicator_matrices[j], current_matrix) for j in range(indicator_matrices.shape[0])]
+            cost_list = np.array(cost_list)
+            candidate_c = np.max(cost_list[remaining_idx])
+            candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
+            idx = candidate_idx[np.argmax(interval[candidate_idx])]
+            selected_channels.append(idx)
+            masked_idx[idx] = True
+            current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
         return selected_channels
 
-        # indicator_matrices = np.array([m>tau for m, tau in zip(matrices, max_inner)])
-        # masked_idx = np.array([False]*len(indicator_matrices))
-        # completeness = np.array([count_true(m) for m in indicator_matrices])
-        # selected_channels = []
-        # selected_channels.append(np.argmax(completeness))
-        # # selected_channels.append(np.argmax(interval))
-        # masked_idx[selected_channels[0]] = True
+        # max_inner = np.max(matrices[:,idx_inner], axis=1).flatten()
+        # min_inter = np.min(matrices[:,idx_inter], axis=1).flatten()
 
-        # for i in range(K-1):
+        # indicator_matrices1 = np.array([m<tau for m, tau in zip(matrices, min_inter)])
+        # indicator_matrices2 = np.array([m>tau for m, tau in zip(matrices, max_inner)])
+        # indicator_matrices = matrix_OR([indicator_matrices1, indicator_matrices2])
+        # # indicator_matrices = indicator_matrices1
+        # print(indicator_matrices.shape, true_matrices.shape, indicator_matrices[0].shape)
+    
+        # selected_channels = []
+        # masked_idx = np.array([False]*len(indicator_matrices))
+        # current_matrix = np.zeros(true_matrices.shape).astype(bool)
+        # for i in range(K):
         #     remaining_idx = np.argwhere(~masked_idx).flatten()
-        #     # remaining_matrices = matrices[remaining_idx]
-        #     # plus current matrices
-        #     current_matrix = np.stack([matrices[idx] for idx in selected_channels]).sum(axis=0)
-        #     # plus current matrices with remaining matrices
-        #     current_candidates = np.stack([current_matrix+matrices[idx] for idx in remaining_idx])
-        #     max_inner = np.max(current_candidates[:,idx_inner], axis=1).flatten()
-        #     candidate_indicator_matrices = np.array([m>tau for m, tau in zip(current_candidates, max_inner)])
-        #     candidate_completeness = np.array([count_true(m) for m in candidate_indicator_matrices])
-        #     # print(candidate_completeness)
-        #     # if there are more than one candidate with the same completeness, select the one with the maximum interval
-        #     idx = remaining_idx[np.argmax(candidate_completeness)]
-        #     print('max completeness', np.max(candidate_completeness))
-        #     if len(np.argwhere(candidate_completeness==np.max(candidate_completeness)).flatten()) > 1:
-        #         idx = remaining_idx[np.argmax(interval[remaining_idx])]
+        #     # print(remaining_idx)
+        #     if len(remaining_idx) == 0 or len(selected_channels) >= K:
+        #         break
+        #     cost_list = [cost(indicator_matrices[j], true_matrices) for j in range(indicator_matrices.shape[0])]
+        #     cost_list = np.array(cost_list)
+        #     candidate_c = np.max(cost_list[remaining_idx])
+        #     candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
+        #     idx = candidate_idx[np.argmax(interval[candidate_idx])]
         #     selected_channels.append(idx)
+        #     # mask the idx and the idx with the same cluster
         #     masked_idx[idx] = True
+        #     current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
+
         # return selected_channels
 
-def load_selection_result_from_txt(path):
-    with open(path, 'r') as f:
-        lines = f.read().splitlines()
-        fname_list = [line.split(' ')[0] for line in lines]
-        line_channels = [line.replace(' ','').split('[')[1][:-1] for line in lines]
-        line_channels = [[int(e) for e in line.split(',')] for line in line_channels]
-    return fname_list, line_channels
+def cal_completeness(matrices, true_matrices):
+    idx_inner = np.argwhere(true_matrices==True)
+    idx_inter = np.argwhere(true_matrices==False)
+    num_channels = matrices.shape[0]
+    completeness = []
+    indicator_matrices = np.zeros_like(matrices).astype(bool)
+    for i in range(num_channels):
+        inner_tau = matrices[i, idx_inner].flatten()
+        inter_tau = matrices[i, idx_inter].flatten()
+        inner_tau = np.sort(inner_tau)[::-1]
+        inter_tau = np.sort(inter_tau)
+        # find from where inner_tau is smaller than inter_tau
+        for j in range(len(inner_tau)):
+            if inner_tau[j] < inter_tau[j]:
+                break
+        completeness.append(j)
+        idx_true1 = np.argwhere(matrices[i] > inter_tau[j]).flatten().tolist()
+        # print(idx_true1)
+        indicator_matrices[i, idx_true1] = True
+        # union
+        idx_true1 = list(set(idx_true1+idx_inter.flatten().tolist()))
+        idx_true2 = np.argwhere(matrices[i] < inner_tau[j]).flatten().tolist()
+        # union
+        idx_true2 = list(set(idx_true2+idx_inner.flatten().tolist()))
+        indicator_matrices[i, idx_true2] = True
+    return np.array(completeness), indicator_matrices
 
 def load_data(path):
     data = np.load(path, allow_pickle=True)
@@ -244,32 +218,6 @@ def adapt_for_clf(data, state_seq):
     segments = pd.DataFrame(new_segments)
     label = compact(state_seq)
     return segments, label
-
-def retrieve_data(dataset, method, fname):
-    result_file_path = f'output/selection/{dataset}_{method}.txt'
-    if not os.path.exists(result_file_path):
-        raise ValueError(f'File not found: {result_file_path}')
-    output_path = f'data/temp'
-    os.makedirs(output_path, exist_ok=True)
-
-    with open(result_file_path, 'r') as f:
-        lines = f.read().splitlines()
-        fname_list = [line.split(' ')[0] for line in lines]
-        line_channels = [line.replace(' ','').split('[')[1][:-1] for line in lines]
-        line_channels = [[int(e) for e in line.split(',')] for line in line_channels]
-        # find corresponding channels for fname
-        idx = fname_list.index(fname)
-        selected_channels = line_channels[idx]
-    
-    f_list = os.listdir(f'data/{dataset}/raw')
-    for fn in f_list:
-        data_path = f'data/{dataset}/raw'
-        data = np.load(os.path.join(data_path, fn), allow_pickle=True)
-        data_raw = data[:,:-1]
-        label = data[:,-1].astype(int) # pca does not use label
-        data_reduced = data[:,selected_channels]
-        data_reduced = np.vstack((data_reduced.T, label)).T
-        np.save(os.path.join(output_path, fn), data_reduced)
 
 def matrix_OR(matrices):
     """
@@ -425,9 +373,6 @@ def calculate_acf(x, lags):
     x = x.copy()
     n = len(x)
     x = x.astype(float)
-    
-    # result = [np.correlate(x[i:]-x[i:].mean(),x[:n-i]-x[:n-i].mean())[0]\
-	#     /(x[i:].std()*x[:n-i].std()*(n-i)) for i in range(1,lags+1)]
     result = [np.correlate(x[i:], x[:n-i]) for i in range(1, lags+1)]
     return np.array(result)
 
@@ -497,59 +442,6 @@ def compact_matrix(state_seq):
     compact_true_matrix = compact_true_matrix==1
     return compact_true_matrix
 
-def search_thresholds_cf(matrices, true_matrix, state_seq):
-    """
-    Search for the threshold to dertermine complete channel.
-    """
-    matrices = matrices.copy()
-    num_channels = matrices.shape[0]
-    compact_true_matrix = compact_matrix(state_seq)
-    elems, counts = np.unique(state_seq, return_counts=True)
-    compact_state_seq = compact(state_seq)
-
-    new_compact_state_seq = []
-    for e in compact_state_seq:
-        # if e only appears once, split it into two segments.
-        if len(np.argwhere(compact_state_seq==e)) == 1:
-            new_compact_state_seq.append(e)
-            new_compact_state_seq.append(e)
-        else:
-            new_compact_state_seq.append(e)
-    compact_state_seq = np.array(new_compact_state_seq)
-
-    compacted_matrices = []
-    for i in range(num_channels):
-        compacted_matrix = np.zeros(compact_true_matrix.shape)
-        for j, e1 in enumerate(elems):
-            for k, e2 in enumerate(elems):
-                if e1 != e2:
-                    e1_idx = np.argwhere(compact_state_seq==e1).flatten()
-                    e2_idx = np.argwhere(compact_state_seq==e2).flatten()
-                    compacted_matrix[j,k] = np.max(matrices[i][e1_idx, :][:, e2_idx])
-                else:
-                    e1_idx = np.argwhere(compact_state_seq==e1).flatten()
-                    e2_idx = np.argwhere(compact_state_seq==e2).flatten()
-                    # compacted_matrix[j,k] = np.min(matrices[i][e1_idx, :][:, e2_idx])
-                    # mean = 0
-                    # cnt = 0
-                    ulist = []
-                    for loc1 in e1_idx:
-                        for loc2 in e2_idx:
-                            if loc1 != loc2:
-                                # mean += matrices[i][loc1, loc2]
-                                # cnt += 1
-                                ulist.append(matrices[i][loc1, loc2])
-                    compacted_matrix[j,k] = np.min(ulist)
-                    # compacted_matrix[j,k] = mean/cnt
-        compacted_matrices.append(compacted_matrix)
-    compacted_indicator_matrices = []
-    for i in range(num_channels):
-        diag = np.diag(compacted_matrices[i])
-        tau = np.max(diag)
-        compacted_indicator_matrix = compacted_matrices[i] > tau
-        compacted_indicator_matrices.append(compacted_indicator_matrix)
-    return compacted_matrices, compacted_indicator_matrices
-
 def cluster_corr(corr_array, threshold=0.2, inplace=False):
     """
     Rearranges the correlation matrix, corr_array, so that groups of highly 
@@ -578,7 +470,7 @@ def pair_wise_nntest(segments, n, k, method='nn'):
     matrix = np.zeros((num_segments, num_segments))
     for i in range(num_segments):
          for j in range(num_segments):
-            if i > j:
+            if i >= j:
                 continue
             if method == 'ks':
                 # result = stats.ks_2samp(segments[i], segments[j], method='asymp')

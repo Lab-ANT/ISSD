@@ -47,10 +47,8 @@ print(f'Processing {dataset} using {method}')
 raw_data_path = f'data/{dataset}/raw'
 data_output_path = f'data/{dataset}/{method}' # path to save the selected data
 os.makedirs(data_output_path, exist_ok=True)
-# selection_output_path = f'output/selection/' # path to save the selected channels idx
-# os.makedirs(selection_output_path, exist_ok=True)
 
-if method not in ['issd', 'issd-qf', 'issd-cf', 'mi', 'sfs', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap', 'sfs']:
+if method not in ['issd', 'mi', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
     raise ValueError(f'Unsupported method: {method}')
 
 fname_list = os.listdir(raw_data_path)
@@ -71,11 +69,11 @@ if method == 'issd':
     for fname in tqdm.tqdm(fname_list):
         data, label = load_data(os.path.join(raw_data_path, fname))
         num_channels = data.shape[1]
-        result = issd(data,
-                    label,
-                    n_components,
-                    strategy='qf', # qf strategy
-                    save_path=f'output/issd-qf/{dataset}/{fname[:-4]}')
+        # result = issd(data,
+        #             label,
+        #             n_components,
+        #             strategy='qf', # qf strategy
+        #             save_path=f'output/issd-qf/{dataset}/{fname[:-4]}')
         result = issd(data,
                     label,
                     n_components,
@@ -97,28 +95,25 @@ if method == 'issd':
 
         selected_channels_qf = inte_issd(dataset, n_components, fname_list_train, 'qf')
         selected_channels_cf = inte_issd(dataset, n_components, fname_list_train, 'cf')
-        # selected_channels_qf = inte_issd_v2(dataset, n_components, fname_list_train, 'qf')
-        # selected_channels_cf = inte_issd_v2(dataset, n_components, fname_list_train, 'cf')
-        # inte_issd_v3(dataset, num_channels, fname_list_train)
 
         print(f'qf: {selected_channels_qf}')
         print(f'cf: {selected_channels_cf}')
 
         score_qf = 0
         score_cf = 0
-        for fname in fname_list_train:
-            data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
-            reduced_data_issd_qf = data[:,selected_channels_qf]
-            lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
-            score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
+        # for fname in fname_list_train:
+            # data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
+            # reduced_data_issd_qf = data[:,selected_channels_qf]
+            # lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+            # score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
             # lda_issd_qf = PCA(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
             # score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
             # score_qf += np.sum(mutual_info_regression(reduced_data_issd_qf, state_seq))
 
-            data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
-            reduced_data_issd_cf = data[:,selected_channels_cf]
-            lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
-            score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
+            # data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
+            # reduced_data_issd_cf = data[:,selected_channels_cf]
+            # lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+            # score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
             # lda_issd_cf = PCA(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
             # score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
             # score_cf += np.sum(mutual_info_regression(reduced_data_issd_cf, state_seq))
@@ -130,6 +125,7 @@ if method == 'issd':
         else:
             selected_channels = selected_channels_cf
         selected_channels = selected_channels_cf
+        print(f'selected channels: {selected_channels}')
         
         os.makedirs(data_output_path+'-qf', exist_ok=True)
         os.makedirs(data_output_path+'-cf', exist_ok=True)
@@ -139,49 +135,6 @@ if method == 'issd':
             np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
             np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
             np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
-
-elif method == 'sfs':
-    # devide the dataset into two parts
-    part1_list = fname_list[:len(fname_list)//2]
-    part2_list = fname_list[len(fname_list)//2:]
-    
-    for i in range(2):
-        # rotate the dataset
-        if i == 0:
-            fname_list_train = part1_list
-            fname_list_test = part2_list
-        else:
-            fname_list_train = part2_list
-            fname_list_test = part1_list
-
-        selected_channels_for_each_ts = []
-        for fname in tqdm.tqdm(fname_list_train):
-            data, label = load_data(os.path.join(raw_data_path, fname))
-            # PAMAP2 is too large for sfs, requires 5x downsampling
-            if dataset == 'PAMAP2':
-                data = data[::5]
-                label = label[::5]
-            num_channels = data.shape[1]
-            knn = KNeighborsClassifier(n_neighbors=4)
-            sfs = SequentialFeatureSelector(knn,
-                                        n_features_to_select=n_components,
-                                        n_jobs=10,)
-            sfs.fit_transform(data, label)
-            result = sfs.get_support(indices=True)
-            result = [int(e) for e in result]
-            selected_channels_for_each_ts.append(result)
-        # majority voting
-        results = np.array(selected_channels_for_each_ts).flatten()
-        elems, cnt = np.unique(results, return_counts=True)
-        result = elems[np.argsort(cnt)[::-1][:n_components]]
-        print(result)
-        
-        # integrate
-        for fn_test in fname_list_test:
-            data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
-            data_reduced = data[:,result]
-            data_reduced = np.vstack((data_reduced.T, state_seq)).T
-            np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
 
 elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
     # devide the dataset into two parts
