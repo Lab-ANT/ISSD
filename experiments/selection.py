@@ -160,11 +160,14 @@ elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
         # SFM
         if method == 'sfm':
             estimator = LogisticRegression()
-            sfm = SelectFromModel(estimator, max_features=n_components)
+            sfm = SelectFromModel(estimator, max_features=n_components, threshold=-np.inf)
+            # threshold=-np.inf means that the features are selected according to the importance of the feature
+            # using default threshold may not select the desired number (<=) of features
+            # please see the documentation from scikit-learn for more details.
             sfm.fit(data, state_seq)
             result = sfm.get_support(indices=True)
             result = [int(e) for e in result]
-            print(result)
+            print(result[:n_components])
             for fn_test in fname_list_test:
                 data, state_seq = load_data(os.path.join(raw_data_path, fn_test))
                 data_reduced = data[:,result]
