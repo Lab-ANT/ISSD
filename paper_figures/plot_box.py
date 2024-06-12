@@ -32,16 +32,40 @@ for metric in ['ari', 'purity', 'nmi']:
         print(dataset_names, method_names)
         table = np.array(table)
     table = table/100
+    print(table.shape)
     num_datasets = int(table.shape[0]/num_dmethod)
 
-    print(table)
-
     plt.style.use('classic')
-    # boxplot
-    plt.figure(figsize=(8, 4))
-    plt.title(f'{metric.upper()} Boxplot', fontsize=20)
-    plt.boxplot(table, patch_artist=True)
-    plt.xticks(range(1, 8), clf_name_list)
-    plt.ylim(0, 1)
+    fig, ax = plt.subplots(figsize=(4, 3.2))
+
+    parts = ax.violinplot(table, showmeans=False, showmedians=True, showextrema=False)
+
+    # violin setting
+    for pc in parts['bodies']:
+        pc.set_facecolor('skyblue')
+        pc.set_edgecolor('skyblue')
+        pc.set_alpha(1)
+
+    box = ax.boxplot(table, widths=0.25, patch_artist=True)
+
+    # box setting
+    for patch in box['boxes']:
+        patch.set(facecolor='white')
+        # patch.set(edgecolor='black')
+
+    # median setting
+    for median in box['medians']:
+        median.set(color='red')
+
+    # ax.set_yticks(np.arange(0, 1, 0.2))
+    ax.set_ylim(0, 1.05)
+    # ax.set_xticks(range(len(clf_name_list)), clf_name_list, rotation=45)
+    ax.set_xticklabels(clf_name_list, rotation=45)
+    ax.set_ylabel(f'{metric.upper()}', fontsize=15)
+    ax.yaxis.labelpad = -1
+
+    ax.grid(axis='y', lw=1, linestyle='--', color='gray')
+
     plt.tight_layout()
-    plt.savefig(f'output/figs/boxplot_{metric}.png')
+    plt.savefig(f'output/figs/violinplot_{metric}.png')
+    plt.savefig(f'output/figs/violinplot_{metric}.pdf')
