@@ -125,6 +125,7 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         masked_idx = np.array([False]*len(mean_inner))
         current_matrix = np.zeros(true_matrices.shape).astype(bool)
 
+        # STATIC FORWARD SELECTION
         while len(selected_channels) < K:
             remaining_idx = np.argwhere(~masked_idx).flatten()
             if len(remaining_idx) == 0:
@@ -140,33 +141,44 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
             current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
         return selected_channels
 
-        # max_inner = np.max(matrices[:,idx_inner], axis=1).flatten()
-        # min_inter = np.min(matrices[:,idx_inter], axis=1).flatten()
-
-        # indicator_matrices1 = np.array([m<tau for m, tau in zip(matrices, min_inter)])
-        # indicator_matrices2 = np.array([m>tau for m, tau in zip(matrices, max_inner)])
-        # indicator_matrices = matrix_OR([indicator_matrices1, indicator_matrices2])
-        # # indicator_matrices = indicator_matrices1
-        # print(indicator_matrices.shape, true_matrices.shape, indicator_matrices[0].shape)
-    
-        # selected_channels = []
-        # masked_idx = np.array([False]*len(indicator_matrices))
-        # current_matrix = np.zeros(true_matrices.shape).astype(bool)
-        # for i in range(K):
+        # # STATIC BACKWARD SELECTION
+        # # initialize with all channels [0,1,2,...,num_channels-1]
+        # selected_channels = list(range(matrices.shape[0]))
+        # # remove channels until the number of selected channels is K
+        # while len(selected_channels) > K:
         #     remaining_idx = np.argwhere(~masked_idx).flatten()
-        #     # print(remaining_idx)
-        #     if len(remaining_idx) == 0 or len(selected_channels) >= K:
+        #     if len(remaining_idx) == 0:
+        #         print('No more channels to select.')
         #         break
-        #     cost_list = [cost(indicator_matrices[j], true_matrices) for j in range(indicator_matrices.shape[0])]
-        #     cost_list = np.array(cost_list)
-        #     candidate_c = np.max(cost_list[remaining_idx])
-        #     candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
+        # print(selected_channels)
+        # return selected_channels
+
+        # # DYNAMIC FORWARD SELECTION
+        # selected_channels.append(np.argmax(interval))
+        # masked_idx[selected_channels[0]] = True
+        # while len(selected_channels) < K:
+        #     remaining_idx = np.argwhere(~masked_idx).flatten()
+        #     if len(remaining_idx) == 0:
+        #         print('No more channels to select.')
+        #         break
+        #     # average the matrices of the selected channels
+        #     if len(selected_channels) == 0: # empty
+        #         current_matrix = np.zeros(true_matrices.shape).astype(bool)
+        #     else:
+        #         current_matrix = matrices[selected_channels].mean(axis=0)
+        #     remaining_matrices = matrices[remaining_idx]
+        #     # add current_matrix to each row of remaining_matrices
+        #     # current_matrix is of shape (num_segs,)
+        #     # remaining_matrices is of shape (num_remaining, num_segs)
+        #     # result is of shape (num_remaining, num_segs)
+        #     result = remaining_matrices + current_matrix
+        #     completeness, _ = cal_completeness(result, true_matrices)
+        #     # idx = remaining_idx[np.argmax(completeness)]
+        #     candidate_c = np.min(completeness)
+        #     candidate_idx = remaining_idx[np.argwhere(completeness==candidate_c).flatten()]
         #     idx = candidate_idx[np.argmax(interval[candidate_idx])]
         #     selected_channels.append(idx)
-        #     # mask the idx and the idx with the same cluster
         #     masked_idx[idx] = True
-        #     current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
-
         # return selected_channels
 
 def cal_completeness(matrices, true_matrices):
