@@ -122,8 +122,7 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         selected_channels = []
         masked_idx = np.array([False]*len(mean_inner))
 
-        # # STATIC FORWARD SELECTION
-        # # STATIC BACKWARD IS EQUIVALENT TO STATIC FORWARD
+        # STATIC FORWARD SELECTION
         # completeness, indicator_matrices = cal_completeness(matrices, true_matrices)
         # current_matrix = np.zeros(true_matrices.shape).astype(bool)
         # while len(selected_channels) < K:
@@ -141,7 +140,24 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         #     current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
         # return selected_channels
 
-        # # DYNAMIC FORWARD SELECTION
+        # STATIC BACKWARD SELECTION
+        completeness, indicator_matrices = cal_completeness(matrices, true_matrices)
+        # initialize with all channels
+        selected_channels = list(range(matrices.shape[0]))
+        while len(selected_channels) > K:
+            remaining_idx = np.argwhere(~masked_idx).flatten()
+            current_matrix = matrix_OR(indicator_matrices[selected_channels])
+            cost_list = [cost(indicator_matrices[j], current_matrix) for j in range(indicator_matrices.shape[0])]
+            cost_list = np.array(cost_list)
+            candidate_c = np.min(cost_list[remaining_idx])
+            candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
+            idx = candidate_idx[np.argmin(interval[candidate_idx])]
+            selected_channels.remove(idx)
+            masked_idx[idx] = True
+            current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
+        return selected_channels
+
+        # DYNAMIC FORWARD SELECTION
         # while len(selected_channels) < K:
         #     remaining_idx = np.argwhere(~masked_idx).flatten()
         #     if len(remaining_idx) == 0:
@@ -169,42 +185,21 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
 
         # DYNAMIC BACKWARD SELECTION
         # initialize with all channels
-        selected_channels = list(range(matrices.shape[0]))
-        while len(selected_channels) > K:
-            remaining_idx = np.argwhere(~masked_idx).flatten()
-            current_matrix = matrices[selected_channels].sum(axis=0)
-            # print(current_matrix.shape)
-            remaining_matrices = matrices[remaining_idx]
-            remaining_matrices = current_matrix - remaining_matrices
-            # print(remaining_matrices.shape)
-            completeness, _ = cal_completeness(remaining_matrices, true_matrices)
-            candidate_c_for_removal = np.max(completeness)
-            candidate_idx_for_removal = remaining_idx[np.argwhere(completeness==candidate_c_for_removal).flatten()]
-            idx_for_removal = candidate_idx_for_removal[np.argmin(interval[candidate_idx_for_removal])]
-            selected_channels.remove(idx_for_removal)
-            masked_idx[idx_for_removal] = True
-        return selected_channels
-            
-        #     # average the matrices of the selected channels
-        #     if len(selected_channels) == 0: # empty
-        #         current_matrix = np.zeros(true_matrices.shape).astype(bool)
-        #     else:
-        #         current_matrix = matrices[selected_channels].mean(axis=0)
+        # selected_channels = list(range(matrices.shape[0]))
+        # while len(selected_channels) > K:
+        #     remaining_idx = np.argwhere(~masked_idx).flatten()
+        #     current_matrix = matrices[selected_channels].sum(axis=0)
+        #     # print(current_matrix.shape)
         #     remaining_matrices = matrices[remaining_idx]
-        #     # add current_matrix to each row of remaining_matrices
-        #     # current_matrix is of shape (num_segs,)
-        #     # remaining_matrices is of shape (num_remaining, num_segs)
-        #     # result is of shape (num_remaining, num_segs)
-        #     result = remaining_matrices + current_matrix
-        #     completeness, _ = cal_completeness(result, true_matrices)
-        #     # idx = remaining_idx[np.argmax(completeness)]
-        #     candidate_c = np.min(completeness)
-        #     candidate_idx = remaining_idx[np.argwhere(completeness==candidate_c).flatten()]
-        #     idx = candidate_idx[np.argmax(interval[candidate_idx])]
-        #     selected_channels.append(idx)
-        #     masked_idx[idx] = True
+        #     remaining_matrices = current_matrix - remaining_matrices
+        #     # print(remaining_matrices.shape)
+        #     completeness, _ = cal_completeness(remaining_matrices, true_matrices)
+        #     candidate_c_for_removal = np.max(completeness)
+        #     candidate_idx_for_removal = remaining_idx[np.argwhere(completeness==candidate_c_for_removal).flatten()]
+        #     idx_for_removal = candidate_idx_for_removal[np.argmin(interval[candidate_idx_for_removal])]
+        #     selected_channels.remove(idx_for_removal)
+        #     masked_idx[idx_for_removal] = True
         # return selected_channels
-        return [0,1,2,3]
 
 # def cal_completeness(matrices, true_matrices):
 #     idx_inner = np.argwhere(true_matrices==True)
