@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 datasets = ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']
-methods = ['pca', 'umap', 'issd', 'ecp', 'ecs', 'lda', 'sfm']
+methods = ['raw', 'pca', 'umap', 'issd', 'ecp', 'ecs', 'lda', 'sfm']
 
 for d in datasets:
     for m in methods:
@@ -24,7 +24,7 @@ for d in datasets:
             data = np.load(os.path.join(original_path, fname), allow_pickle=True)
             label = data[:,-1].astype(int)
             data = data[:,:-1]
-            data = StandardScaler().fit_transform(data)
+            # data = StandardScaler().fit_transform(data)
             np.savetxt(os.path.join(output_path, fname.replace('.npy', '.txt')),
                        data,
                        delimiter='\t',
