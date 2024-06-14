@@ -34,9 +34,9 @@ print(f'Processing {dataset} using {method} with {dmethod}')
 #     print('The data does not exist. Please check the dataset and method name.')
 #     exit()
 
-if dmethod not in ['time2state', 'ticc', 'e2usd']:
-    print('The downstream method does not exist. Please check the downstream method name.')
-    exit()
+# if dmethod not in ['time2state', 'ticc', 'e2usd']:
+    # print('The downstream method does not exist. Please check the downstream method name.')
+    # exit()
 
 f_list = os.listdir(os.path.join(script_path, f'../data/{dataset}/raw/'))
 f_list = list(f_list)
