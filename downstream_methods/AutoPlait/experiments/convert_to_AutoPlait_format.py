@@ -24,7 +24,7 @@ for d in datasets:
             data = np.load(os.path.join(original_path, fname), allow_pickle=True)
             label = data[:,-1].astype(int)
             data = data[:,:-1]
-            # data = StandardScaler().fit_transform(data)
+            data = StandardScaler().fit_transform(data)
             np.savetxt(os.path.join(output_path, fname.replace('.npy', '.txt')),
                        data,
                        delimiter='\t',
