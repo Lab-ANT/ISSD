@@ -10,7 +10,7 @@ params = {
     "lr": 0.003,
     "out_channels": 4,
     "reduced_size": 80,
-    "cuda": False,
+    "cuda": True,
     "gpu": 0,
     "M" : 20,
     "N" : 4
