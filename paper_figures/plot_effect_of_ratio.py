@@ -49,3 +49,4 @@ plt.tight_layout()
 # place legend in lower right corner
 plt.legend(loc='lower right')
 plt.savefig('output/figs/case_study_ratio.pdf')
+plt.savefig('output/figs/case_study_ratio.png')
