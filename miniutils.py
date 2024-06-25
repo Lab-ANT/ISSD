@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 from sklearn.neighbors import KDTree, BallTree
-from sklearn.metrics import accuracy_score
-from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
+from scipy.signal import find_peaks
 
 def is_constant(signal, tolerance=1e-5):
     return np.all(np.abs(np.diff(signal)) < tolerance)
@@ -76,7 +76,7 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
             true_matrices = np.hstack(true_matrices)
         corr_matrices = np.array(corr_matrices).mean(axis=0)
         clusters = cluster_corr(corr_matrices, threshold=clustering_threshold)
-        print(matrices.shape, true_matrices.shape, corr_matrices.shape)
+        # print(matrices.shape, true_matrices.shape, corr_matrices.shape)
         idx_inner = np.argwhere(true_matrices==True)
         idx_inter = np.argwhere(true_matrices==False)
         mean_inner = np.mean(matrices[:,idx_inner], axis=1).flatten()
@@ -123,39 +123,39 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         masked_idx = np.array([False]*len(mean_inner))
 
         # STATIC FORWARD SELECTION
-        # completeness, indicator_matrices = cal_completeness(matrices, true_matrices)
-        # current_matrix = np.zeros(true_matrices.shape).astype(bool)
-        # while len(selected_channels) < K:
-        #     remaining_idx = np.argwhere(~masked_idx).flatten()
-        #     if len(remaining_idx) == 0:
-        #         print('No more channels to select.')
-        #         break
-        #     cost_list = [cost(indicator_matrices[j], current_matrix) for j in range(indicator_matrices.shape[0])]
-        #     cost_list = np.array(cost_list)
-        #     candidate_c = np.max(cost_list[remaining_idx])
-        #     candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
-        #     idx = candidate_idx[np.argmax(interval[candidate_idx])]
-        #     selected_channels.append(idx)
-        #     masked_idx[idx] = True
-        #     current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
-        # return selected_channels
-
-        # STATIC BACKWARD SELECTION
         completeness, indicator_matrices = cal_completeness(matrices, true_matrices)
-        # initialize with all channels
-        selected_channels = list(range(matrices.shape[0]))
-        while len(selected_channels) > K:
+        current_matrix = np.zeros(true_matrices.shape).astype(bool)
+        while len(selected_channels) < K:
             remaining_idx = np.argwhere(~masked_idx).flatten()
-            current_matrix = matrix_OR(indicator_matrices[selected_channels])
+            if len(remaining_idx) == 0:
+                print('No more channels to select.')
+                break
             cost_list = [cost(indicator_matrices[j], current_matrix) for j in range(indicator_matrices.shape[0])]
             cost_list = np.array(cost_list)
-            candidate_c = np.min(cost_list[remaining_idx])
+            candidate_c = np.max(cost_list[remaining_idx])
             candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
-            idx = candidate_idx[np.argmin(interval[candidate_idx])]
-            selected_channels.remove(idx)
+            idx = candidate_idx[np.argmax(interval[candidate_idx])]
+            selected_channels.append(idx)
             masked_idx[idx] = True
             current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
         return selected_channels
+
+        # STATIC BACKWARD SELECTION
+        # completeness, indicator_matrices = cal_completeness(matrices, true_matrices)
+        # # initialize with all channels
+        # selected_channels = list(range(matrices.shape[0]))
+        # while len(selected_channels) > K:
+        #     remaining_idx = np.argwhere(~masked_idx).flatten()
+        #     current_matrix = matrix_OR(indicator_matrices[selected_channels])
+        #     cost_list = [cost(indicator_matrices[j], current_matrix) for j in range(indicator_matrices.shape[0])]
+        #     cost_list = np.array(cost_list)
+        #     candidate_c = np.min(cost_list[remaining_idx])
+        #     candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
+        #     idx = candidate_idx[np.argmin(interval[candidate_idx])]
+        #     selected_channels.remove(idx)
+        #     masked_idx[idx] = True
+        #     current_matrix = matrix_OR([current_matrix, indicator_matrices[idx]])
+        # return selected_channels
 
         # DYNAMIC FORWARD SELECTION
         # while len(selected_channels) < K:
@@ -394,19 +394,6 @@ def state_seq_to_seg_json(state_seq):
     seg_json[len(state_seq)] = pre
     return seg_json
 
-def find_local_maxima_in_acf(x):
-    """
-    Find local maxima
-    @Params:
-        x: time series
-    """
-    local_maxima = []
-    length = len(x)
-    for i in range(1, length-1):
-        if x[i] > x[i-1] and x[i] > x[i+1]:
-            local_maxima.append(i)
-    return local_maxima
-
 def calculate_acf(x, lags):
     """
     Calculate autocorrelation
@@ -420,14 +407,12 @@ def calculate_acf(x, lags):
     result = [np.correlate(x[i:], x[:n-i]) for i in range(1, lags+1)]
     return np.array(result)
 
-
 def find_k_by_acf(x, max_lag=500, default=50):
     """
     Find the subseries length k by acf.
     @Params:
         x: time series
     """
-    # length = x.shape[0]
     x = x.copy()
     number_channels = x.shape[1]
     acf_list = []
@@ -435,16 +420,16 @@ def find_k_by_acf(x, max_lag=500, default=50):
         channel = x[:,channel_idx]
         # Calculate autocorrelation
         # use cross correlation
-        # autocorr = np.correlate(channel, channel, mode='full')
+        # acf = np.correlate(channel, channel, mode='full')
         acf = calculate_acf(channel, max_lag)
-        local_maxima = find_local_maxima_in_acf(acf)
-        # if no maxima, set default value to 50.
-        if len(local_maxima) == 0:
-            local_maxima.append(default)
-        if local_maxima[0] > max_lag or local_maxima[0] < 10:
-            local_maxima[0] = default
-        # print(local_maxima[0])
-        acf_list.append(local_maxima[0])
+        peak, _ = find_peaks(acf.flatten(), height=0, prominence=0.1)
+        if len(peak)==0: # if no maxima, set to default.
+            peak = default
+        elif peak[0] > max_lag or peak[0] < 10: # if the maxima is out of range, set to default.
+            peak = default
+        else: # otherwise, set to the first peak.
+            peak = peak[0]
+        acf_list.append(peak)
     return np.array(acf_list)
 
 def search_thresholds(matrices, true_matrix):
