@@ -130,31 +130,22 @@ def generate(s):
     # generate noise channels.
     for i in range(num_relevant_channels):
         result = np.random.normal(0, 1, length).round(4)
-        channel_list.append(result)    
+        channel_list.append(result)  
     # generate destructive channels.
-    seg_json = {2000:0,4000:1,6000:2,8000:3,10000:0,12000:1,14000:2,16000:3,20000:4}
-    for i in range(num_relevant_channels-2):
+    seg_json = {2000:0,4000:1,6000:2,8000:3,10000:4,12000:5,14000:6,16000:7,20000:8}
+    for i in range(num_relevant_channels):
         result = gen_channel_from_json(seg_json, forking_depth=3).round(4)
         channel_list.append(result)
-    # temp_json_list = [
-    #     {2000:0,4000:1,20000:2},
-    #     {4000:0,6000:1,8000:2,20000:0},
-    #     {8000:0,10000:1,12000:2,20000:0},
-    #     {12000:0,14000:1,16000:2,20000:0}
-    # ]
     temp_json_list = [
         {2000:0,4000:1,20000:2},
         {4000:0,6000:1,8000:2,20000:0},
         {8000:0,10000:1,12000:2,20000:0},
         {12000:0,14000:1,16000:2,20000:0}
     ]
-    for i in range(num_relevant_channels-2):      
-        result = gen_channel_from_json(temp_json_list[i], forking_depth=4).round(4)
-        channel_list.append(result)
     for i in range(num_relevant_channels):      
         result = gen_channel_from_json(temp_json_list[i], forking_depth=1).round(4)
         channel_list.append(result)
-    seg_json = {2000:s+0,4000:s+1,6000:s+2,8000:s+3,10000:s+0,12000:s+1,14000:s+2,16000:s+3,20000:s+4}
+    seg_json = {2000:s+0,4000:s+1,6000:s+2,8000:s+3,10000:s+4,12000:s+5,14000:s+6,16000:s+7,20000:s+7}
     state_seq = seg_to_label(seg_json).astype(int)
     channel_list.append(state_seq)
     result = np.stack(channel_list).T

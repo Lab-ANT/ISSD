@@ -211,6 +211,7 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
 #         inner_tau = np.max(matrices[i, idx_inner].flatten())
 #         c = np.sum(matrices[i]>inner_tau)
 #         completeness.append(c)
+#         indicator_matrices[i, matrices[i]>inner_tau] = True
 #     return np.array(completeness), indicator_matrices
 
 def cal_completeness(matrices, true_matrices):
