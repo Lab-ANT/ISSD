@@ -3,7 +3,7 @@
 execution_num=$1
 
 dataset_list=(MoCap ActRecTut PAMAP2 USC-HAD SynSeg)
-method_list=(issd pca umap ecs ecp lda sfm)
+method_list=(issd issd-qf issd-cf pca umap ecs ecp lda sfm)
 
 for dataset in ${dataset_list[@]}; do
   for method in ${method_list[@]}; do
