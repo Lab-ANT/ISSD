@@ -101,22 +101,22 @@ if method == 'issd':
 
         score_qf = 0
         score_cf = 0
-        # for fname in fname_list_train:
-            # data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
-            # reduced_data_issd_qf = data[:,selected_channels_qf]
-            # lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
-            # score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
-            # lda_issd_qf = PCA(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
-            # score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
-            # score_qf += np.sum(mutual_info_regression(reduced_data_issd_qf, state_seq))
+        for fname in fname_list_train:
+            data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
+            reduced_data_issd_qf = data[:,selected_channels_qf]
+            lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+            score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
+            lda_issd_qf = PCA(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+            score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
+            score_qf += np.sum(mutual_info_regression(reduced_data_issd_qf, state_seq))
 
-            # data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
-            # reduced_data_issd_cf = data[:,selected_channels_cf]
-            # lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
-            # score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
-            # lda_issd_cf = PCA(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
-            # score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
-            # score_cf += np.sum(mutual_info_regression(reduced_data_issd_cf, state_seq))
+            data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
+            reduced_data_issd_cf = data[:,selected_channels_cf]
+            lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+            score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
+            lda_issd_cf = PCA(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+            score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
+            score_cf += np.sum(mutual_info_regression(reduced_data_issd_cf, state_seq))
 
         s_qf = score_qf
         s_cf = score_cf
@@ -124,7 +124,7 @@ if method == 'issd':
             selected_channels = selected_channels_qf
         else:
             selected_channels = selected_channels_cf
-        selected_channels = selected_channels_cf
+        # selected_channels = selected_channels_qf
         print(f'selected channels: {selected_channels}')
         
         os.makedirs(data_output_path+'-qf', exist_ok=True)
