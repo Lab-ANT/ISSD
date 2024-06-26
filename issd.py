@@ -107,11 +107,11 @@ def issd(indicators, state_seq, K,
     """
 
     indicators = indicators.copy()
-    win_size = 10
-    offset = win_size // 2
-    indicators = moving_average(indicators, window_size=win_size)
-    indicators = indicators[offset:-offset,:]
-    state_seq = state_seq[offset:-offset]
+    # win_size = 10
+    # offset = win_size // 2
+    # indicators = moving_average(indicators, window_size=win_size)
+    # indicators = indicators[offset:-offset,:]
+    # state_seq = state_seq[offset:-offset]
     # PARAMS CHECK
     if strategy not in ['cf', 'qf']:
         raise ValueError('strategy must be cf or qf.')
