@@ -134,6 +134,9 @@ def generate(s):
     # generate destructive channels.
     seg_json = {2000:0,4000:1,6000:2,8000:3,10000:4,12000:5,14000:6,16000:7,20000:8}
     for i in range(num_relevant_channels):
+        result = gen_channel_from_json(seg_json, forking_depth=5).round(4)
+        channel_list.append(result)
+    for i in range(num_relevant_channels):
         result = gen_channel_from_json(seg_json, forking_depth=3).round(4)
         channel_list.append(result)
     temp_json_list = [
