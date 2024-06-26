@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 datasets = ['MoCap', 'SynSeg', 'ActRecTut', 'PAMAP2', 'USC-HAD']
-methods = ['raw', 'pca', 'umap', 'issd', 'ecp', 'ecs', 'lda', 'sfm']
+methods = ['raw', 'issd-qf', 'issd-cf', 'pca', 'umap', 'issd', 'ecp', 'ecs', 'lda', 'sfm']
 
 for d in datasets:
     for m in methods:
