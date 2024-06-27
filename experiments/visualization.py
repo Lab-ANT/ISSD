@@ -14,7 +14,7 @@ import sys
 sys.path.append('.')
 from miniutils import compact, reorder_label
 
-methods = ['raw', 'issd', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap']
+methods = ['raw', 'issd', 'issd-qf', 'issd-cf', 'lda', 'sfm', 'ecp' ,'ecs', 'pca', 'umap']
 dataset = ['SynSeg', 'MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD']
 
 for d in dataset:
