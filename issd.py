@@ -70,11 +70,10 @@ def issd(indicators, state_seq, K,
          strategy='qf',
          cluster_threshold=0.2,
          num_samples=30,
-         # subseries_length=50,
          min_seg_len_to_exclude=50,
-         two_sample_method = 'nn',
-         save_path=None,
+         two_sample_method='nn',
          n_jobs=10,
+         save_path=None,
          plot=None):
     """
     Indicator Selection for State Detection.
@@ -107,11 +106,11 @@ def issd(indicators, state_seq, K,
     """
 
     indicators = indicators.copy()
-    # win_size = 10
-    # offset = win_size // 2
-    # indicators = moving_average(indicators, window_size=win_size)
-    # indicators = indicators[offset:-offset,:]
-    # state_seq = state_seq[offset:-offset]
+    win_size = 10
+    offset = win_size // 2
+    indicators = moving_average(indicators, window_size=win_size)
+    indicators = indicators[offset:-offset,:]
+    state_seq = state_seq[offset:-offset]
     # PARAMS CHECK
     if strategy not in ['cf', 'qf']:
         raise ValueError('strategy must be cf or qf.')
