@@ -75,15 +75,15 @@ for metric in ['nmi']:
         # use bold line for all the components
         plt.boxplot(t.T,
             patch_artist=True,
-            whis=[0,100],
-            # showfliers=False,
+            # whis=[0,100],
+            showfliers=True,
             boxprops=dict(linewidth=1.5),
             whiskerprops=dict(linewidth=1.5),
             capprops=dict(linewidth=1.5),
             medianprops=dict(linewidth=1.5))
         # print(dmethod_name_list)
         dmethod_name_list = [convert_name(name) for name in dmethod_name_list]
-        plt.ylim(0,1)
+        plt.ylim(-0.05,1)
         plt.xticks(range(1, num_dmethods+1), dmethod_name_list, fontsize=12)
         plt.title(f'{dataset}', fontsize=16)
         # plt.grid(axis='y', lw=2, linestyle='--', color='gray')
@@ -112,8 +112,8 @@ for metric in ['nmi']:
     # use bold line for all the components
     plt.boxplot(avg_score_on_datasets.T,
         patch_artist=True,
-        whis=[0,100],
-        # showfliers=False,
+        # whis=[0,100],
+        showfliers=True,
         boxprops=dict(linewidth=1.5),
         whiskerprops=dict(linewidth=1.5),
         capprops=dict(linewidth=1.5),
