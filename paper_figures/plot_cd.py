@@ -294,7 +294,7 @@ def draw_cd_diagram(df_perf=None, alpha=0.05, title=None, labels=False):
     """
     p_values, average_ranks, _ = wilcoxon_holm(df_perf=df_perf, alpha=alpha)
 
-    print(average_ranks)
+    print('p_values', average_ranks, p_values)
 
     for p in p_values:
         print(p)
@@ -420,6 +420,7 @@ for metric in ['ari', 'nmi', 'purity']:
                 acc_col.append(table[i,j])
         df = pd.DataFrame({'classifier_name': clf_name_col, 'dataset_name': dataset_name_col, 'accuracy': acc_col})
         df.to_csv(f'output/summary_{metric}.csv', index=False)
+        print(df.shape)
 
     # result_file_path = 'output/summary_ari.csv'
     out_file_name = f'CD_{metric}.png'

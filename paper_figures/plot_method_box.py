@@ -59,6 +59,7 @@ for metric in ['nmi']:
     table = table/100
     num_dmethods = len(dmethod_name_list)
     num_datasets = int(table.shape[0]/num_dmethods)
+    print(table.shape)
 
     print(dataset_names)
     for i, dataset in enumerate(dataset_names):
@@ -118,7 +119,7 @@ for metric in ['nmi']:
         whiskerprops=dict(linewidth=1.5),
         capprops=dict(linewidth=1.5),
         medianprops=dict(linewidth=1.5))
-    plt.ylim(0,1)
+    plt.ylim(-0.05,1)
     plt.xticks(range(1, num_dmethods+1), dmethod_name_list, fontsize=12)
     # plt.grid(axis='y', lw=2, linestyle='--', color='gray')
     # plt.ylim(0.35, 0.85)

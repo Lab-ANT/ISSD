@@ -45,8 +45,8 @@ plt.yticks(fontsize=12)
 plt.xticks(range(10),[i*10 for i in range(1,11)], fontsize=12)
 plt.xlabel('Ratio of Activate Channels (%)', fontsize=16)
 plt.ylabel('NMI', fontsize=16)
+# place legend in upper center, outside the box
+plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.2), ncol=4, fontsize=14.2)
 plt.tight_layout()
-# place legend in lower right corner
-plt.legend(loc='lower right')
 plt.savefig('output/figs/case_study_ratio.pdf')
 plt.savefig('output/figs/case_study_ratio.png')
