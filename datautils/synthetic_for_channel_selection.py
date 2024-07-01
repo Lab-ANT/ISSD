@@ -142,7 +142,7 @@ def generate(s):
         {8000:0,10000:1,12000:2,20000:0},
         {12000:0,14000:1,16000:2,20000:0}
     ]
-    for i in range(num_relevant_channels-2):      
+    for i in range(num_relevant_channels):
         result = gen_channel_from_json(temp_json_list[i], forking_depth=4).round(4)
         channel_list.append(result)
     for i in range(num_relevant_channels):      
