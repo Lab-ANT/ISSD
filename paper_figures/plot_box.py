@@ -68,12 +68,16 @@ for metric in ['ari', 'purity', 'nmi']:
         pc.set_edgecolor('skyblue')
         pc.set_alpha(1)
 
-    box = ax.boxplot(table, widths=0.25, patch_artist=True)
+    box = ax.boxplot(table, widths=0.25, patch_artist=True, showmeans=True)
 
     # box setting
     for patch in box['boxes']:
         patch.set(facecolor='white')
         # patch.set(edgecolor='black')
+    
+    # mean setting
+    for mean in box['means']:
+        mean.set(marker='^', markerfacecolor='green', markersize=5)
 
     # median setting
     for median in box['medians']:
