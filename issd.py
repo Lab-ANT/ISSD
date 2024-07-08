@@ -7,74 +7,105 @@ ISSD v1.0.
 import numpy as np
 from miniutils import *
 import multiprocessing
-from sklearn.preprocessing import StandardScaler
+import os
 
-def selection_strategy_cf(min_inter, max_inner, mean_inter, mean_inner, std_inner, std_inter, cluster, matrices, true_matrix, K):
-    """
-    An equivalent implementation of the algorithm in the paper.
-    """
-    true_matrix = true_matrix.copy()
-    true_matrix = ~true_matrix
-    indicator_matrices = np.array([m>tau for m, tau in zip(matrices, max_inner)])
-
-    masked_idx = np.array([False]*len(min_inter))
-    mean_interval = mean_inter-mean_inner-std_inner-std_inter
-    
-    selection_results = []
-    # COMPLETENESS GUARANTEE
-    # current_matrix = matrix_OR(indicator_matrices[selection_results])
-    current_matrix = np.zeros(true_matrix.shape).astype(bool)
-    # while not is_complete(current_matrix, true_matrix):
-    while len(selection_results) < K:
-        remaining_idx = np.argwhere(~masked_idx).flatten()
-        if len(remaining_idx) == 0 or len(selection_results) >= K:
-            break
-        cost_list = np.array([cost(m, current_matrix) for m in indicator_matrices])
-        if len(np.argwhere(cost_list>0)) == 0:
-            break
-        candidate_c = np.max(cost_list[remaining_idx])
-        candidate_idx = remaining_idx[np.argwhere(cost_list[remaining_idx]==candidate_c).flatten()]
-        idx = candidate_idx[np.argmax(mean_interval[candidate_idx])]
-        selection_results.append(idx)
-        # mask the idx and the idx with the same cluster
-        masked_idx[idx] = True
-        masked_idx[cluster==cluster[idx]] = True
-        current_matrix = matrix_OR(indicator_matrices[selection_results])
-
-    return selection_results, indicator_matrices
-
-def selection_strategy_qf(min_inter, max_inner, mean_inter, mean_inner, std_inner, std_inter, cluster, matrices, true_matrix, K):
-    """
-    An equivalent implementation of the algorithm in the paper.
-    """
-    indicator_matrices = np.array([m>tau for m, tau in zip(matrices, max_inner)])
-
-    masked_idx = np.array([False]*len(min_inter))
-    selection_results = []
-    mean_interval = mean_inter-mean_inner-std_inner-std_inter
-
-    while len(selection_results) < K:
-        remaining_idx = np.argwhere(~masked_idx).flatten()
-        if len(remaining_idx) == 0:
-            break
-        # select the idx with the maximum mean interval
-        idx = remaining_idx[np.argmax(mean_interval[remaining_idx])]
-        selection_results.append(idx)
-        # mask the idx and the idx with the same cluster
-        masked_idx[idx] = True
-        masked_idx[cluster==cluster[idx]] = True
-
-    return selection_results, indicator_matrices
-
-def issd(indicators, state_seq, K,
-         strategy='qf',
-         cluster_threshold=0.2,
+def issd(datalist, state_seq_list, K,
+         clustering_threshold=0.2,
          num_samples=30,
          min_seg_len_to_exclude=100,
-         two_sample_method='nn',
-         n_jobs=10,
-         save_path=None,
-         plot=None):
+         test_method='nn',
+         n_jobs=10):
+    matrices = []
+    true_matrices = []
+    corr_matrices = []
+    for data, state_seq in zip(datalist, state_seq_list):
+        matrices_, true_matrix_, corr_matrix_ = compute_matrices(data,
+                                                            state_seq, 
+                                                            num_samples,
+                                                            min_seg_len_to_exclude,
+                                                            test_method,
+                                                            n_jobs)
+        # print(matrices_.shape, true_matrix_.shape, corr_matrix_.shape)
+        # matrices_: (num_channels, num_segs, num_segs)
+        # true_matrix_: (num_segs, num_segs)
+        # corr_matrix_: (num_channels, num_channels)
+
+        matrices.append(matrices_.reshape(matrices_.shape[0], -1)) # flatten 1,2 dim
+        true_matrices.append(true_matrix_.flatten())
+        corr_matrices.append(corr_matrix_)
+        
+    # QF strategy
+    if len(matrices) == 1:
+        stacked_matrices = matrices[0]
+        stacked_true_matrices = true_matrices[0]
+    else:
+        stacked_matrices = np.hstack(matrices)
+        stacked_true_matrices = np.hstack(true_matrices)
+    corr_matrices = np.array(corr_matrices).mean(axis=0)
+    clusters = cluster_corr(corr_matrices, threshold=clustering_threshold)
+    # print(matrices.shape, true_matrices.shape, corr_matrices.shape)
+    idx_inner = np.argwhere(stacked_true_matrices==True)
+    idx_inter = np.argwhere(stacked_true_matrices==False)
+    mean_inner = np.mean(stacked_matrices[:,idx_inner], axis=1).flatten()
+    mean_inter = np.mean(stacked_matrices[:,idx_inter], axis=1).flatten()
+    interval = mean_inter - mean_inner
+
+    selected_channels_qf = []
+    masked_idx = np.array([False]*len(mean_inner))
+    while len(selected_channels_qf) < K:
+        remaining_idx = np.argwhere(~masked_idx).flatten()
+        if len(remaining_idx) == 0:
+            print('No more channels to select.')
+            break
+        # select the idx with the maximum mean interval
+        idx = remaining_idx[np.argmax(interval[remaining_idx])]
+        selected_channels_qf.append(idx)
+        # mask the idx and the idx with the same cluster
+        masked_idx[idx] = True
+        masked_idx[clusters==clusters[idx]] = True
+
+    # CF strategy
+    ts_interval = []
+    indicator_matrices = []
+    for ts_matrices, ts_true_matrix in zip(matrices, true_matrices):
+        idx_inner = np.argwhere(ts_true_matrix==True)
+        idx_inter = np.argwhere(ts_true_matrix==False)
+        mean_inner = np.mean(ts_matrices[:,idx_inner], axis=1).flatten()
+        mean_inter = np.mean(ts_matrices[:,idx_inter], axis=1).flatten()
+        max_inner = np.max(ts_matrices[:,idx_inner], axis=1).flatten()
+        interval = mean_inter - mean_inner
+        ts_interval.append(interval)
+        indicator_matrices_ = [m>tau for m, tau in zip(ts_matrices, max_inner)]
+        indicator_matrices_ = np.array(indicator_matrices_, dtype=bool)
+        indicator_matrices.append(indicator_matrices_)
+    interval = np.array(ts_interval).mean(axis=0)
+    if len(indicator_matrices) == 1:
+            indicator_matrices = indicator_matrices[0]
+    else:
+        indicator_matrices = np.hstack(indicator_matrices)
+
+    selected_channels_cf = []
+    masked_idx = np.array([False]*len(mean_inner))
+
+    current_matrix = np.zeros(indicator_matrices.shape).astype(bool)
+    while len(selected_channels_cf) < K:
+        remaining_idx = np.argwhere(~masked_idx).flatten()
+        costlist = np.array([cost(m, current_matrix) for m in indicator_matrices])
+        candidate_c = np.max(costlist[remaining_idx])
+        candidate_idx = remaining_idx[np.argwhere(costlist[remaining_idx]==candidate_c).flatten()]
+        idx = candidate_idx[np.argmax(interval[candidate_idx])]
+        selected_channels_cf.append(idx)
+        masked_idx[idx] = True
+        current_matrix = matrix_OR(indicator_matrices[selected_channels_cf])
+
+    return selected_channels_qf, selected_channels_cf
+
+def compute_matrices(indicators, state_seq,
+    num_samples=30,
+    min_seg_len_to_exclude=100,
+    two_sample_method='nn',
+    n_jobs=10,
+    save_path=None):
     """
     Indicator Selection for State Detection.
 
@@ -111,9 +142,6 @@ def issd(indicators, state_seq, K,
     indicators = moving_average(indicators, window_size=win_size)
     indicators = indicators[offset:-offset,:]
     state_seq = state_seq[offset:-offset]
-    # PARAMS CHECK
-    if strategy not in ['cf', 'qf']:
-        raise ValueError('strategy must be cf or qf.')
 
     # CHECK DATA VALIDITY
     # check if indicators and state_seq have the same length
@@ -127,35 +155,31 @@ def issd(indicators, state_seq, K,
     
     # IMPORT LIBRARIES AS NEEDED
     if save_path is not None:
-        import matplotlib.pyplot as plt
-        import os
         os.makedirs(save_path, exist_ok=True)
 
-    # # EXCLUDE TRIVAL SEGMENTS
-    non_trival_idx = exclude_trival_segments(state_seq, min_seg_len_to_exclude)
-    indicators = indicators[non_trival_idx]
-    state_seq = state_seq[non_trival_idx]
-
-    # GET BASIC INFORMATION
-    num_channels = indicators.shape[1]
-    # calculate true matrix
-    method_ctm = calculate_true_matrix if strategy == 'qf' else calculate_true_matrix_cf
-    true_matrix, cut_points = method_ctm(state_seq)
-    min_seg_len = np.min(np.diff(cut_points))
-    acf = find_k_by_acf(indicators,
-                        min_seg_len if min_seg_len<500 else 500,
-                        default=min_seg_len-1)
-
-    # CLUSTER INDICATORS BY PEARSON CORRELATION
-    corr_matrix = pd.DataFrame(indicators).corr(method='pearson').to_numpy()
-    corr_matrix[np.isnan(corr_matrix)] = 1 # two constant channels will yild nan
-    cluster = cluster_corr(corr_matrix, threshold=cluster_threshold)
-
-    # CALACULATE OR LOAD MATRICES
+    # COMPUTE OR LOAD MATRICES
     if save_path is not None and os.path.exists(os.path.join(save_path, 'matrices.npy')):
         print('Existing results found, load saved matrices.')
         matrices = np.load(os.path.join(save_path, 'matrices.npy'))
-    else:
+        true_matrix = np.load(os.path.join(save_path, 'true_matrix.npy'))
+        corr_matrix = np.load(os.path.join(save_path, 'corr_matrix.npy'))
+    else: # COMPUTE
+        # EXCLUDE TRIVAL SEGMENTS
+        non_trival_idx = exclude_trival_segments(state_seq, min_seg_len_to_exclude)
+        indicators = indicators[non_trival_idx]
+        state_seq = state_seq[non_trival_idx]
+        # GET BASIC INFORMATION
+        num_channels = indicators.shape[1]
+        # calculate true matrix
+        true_matrix, cut_points = calculate_true_matrix_cf(state_seq)
+        min_seg_len = np.min(np.diff(cut_points))
+        acf = find_k_by_acf(indicators,
+                            min_seg_len if min_seg_len<500 else 500,
+                            default=min_seg_len-1)
+        # CLUSTER INDICATORS BY PEARSON CORRELATION
+        corr_matrix = pd.DataFrame(indicators).corr(method='pearson').to_numpy()
+        corr_matrix[np.isnan(corr_matrix)] = 1 # two constant channels will yild nan
+        # CALCULATE MATRICES
         pool = multiprocessing.Pool(processes=n_jobs)
         pool_args = []
         for channel_id in range(num_channels):
@@ -171,94 +195,10 @@ def issd(indicators, state_seq, K,
         matrices = res.get()
         matrices = np.stack(matrices)
 
-    # SEARCH THRESHOLD
-    max_inner, min_inter, mean_inner, mean_inter, std_inner, std_inter = search_thresholds(matrices, true_matrix)
-    # compact_true_matrix = compact_matrix(state_seq)
-    if strategy == 'qf':
-        result, indicator_matrices = selection_strategy_qf(min_inter, max_inner,
-                                                           mean_inter, mean_inner,
-                                                           std_inner, std_inter,
-                                                           cluster, matrices,
-                                                           true_matrix, K)
-    else: # cf
-        result, indicator_matrices = selection_strategy_cf(min_inter, max_inner,
-                                                           mean_inter, mean_inner,
-                                                           std_inner, std_inter,
-                                                           cluster, matrices,
-                                                           true_matrix, K)
+        if save_path is not None:
+            # save matrices
+            np.save(os.path.join(save_path, 'matrices.npy'), matrices)
+            np.save(os.path.join(save_path, 'true_matrix.npy'), true_matrix)
+            np.save(os.path.join(save_path, 'corr_matrix.npy'), corr_matrix)
 
-    if save_path is not None:
-        # save matrices
-        np.save(os.path.join(save_path, 'matrices.npy'), matrices)
-        np.save(os.path.join(save_path, 'true_matrix.npy'), true_matrix)
-        np.save(os.path.join(save_path, 'corr_matrix.npy'), corr_matrix)
-        # save intervals
-        np.save(os.path.join(save_path, 'min_inter.npy'), min_inter)
-        np.save(os.path.join(save_path, 'max_inner.npy'), max_inner)
-        np.save(os.path.join(save_path, 'mean_inter.npy'), mean_inter)
-        np.save(os.path.join(save_path, 'mean_inner.npy'), mean_inner)
-        np.save(os.path.join(save_path, 'std_inter.npy'), std_inter)
-        np.save(os.path.join(save_path, 'std_inner.npy'), std_inner)
-        # save cluster
-        np.save(os.path.join(save_path, 'cluster.npy'), cluster)
-    if plot is not None:
-        # plot indicators
-        plot_mts(StandardScaler().fit_transform(indicators), state_seq)
-        plt.savefig(os.path.join(save_path, 'mts.png'))
-        plt.close()
-        # plot selected channels
-        plot_mts(StandardScaler().fit_transform(indicators[:,result]), state_seq)
-        plt.savefig(os.path.join(save_path, 'selected_channels.png'))
-        plt.close()
-        fig, ax = plt.subplots(nrows=K, figsize=(10, K*2))
-        for i,idx in enumerate(result):
-            ax[i].plot(indicators[:,idx])
-        plt.savefig(os.path.join(save_path, f'test.png'))
-        plt.close()
-        # plot indicator matrices
-        width = int(math.sqrt(num_channels))+1
-        fig, ax = plt.subplots(nrows=width, ncols=width, figsize=(20,20))
-        for i in range(width):
-            for j in range(width):
-                ax[i,j].set_yticks([])
-                ax[i,j].set_xticks([])
-                if i*width+j >= num_channels:
-                    continue
-                # print(i*width+j in result)
-                if i*width+j in result:
-                    ax[i,j].imshow(matrices[i*width+j], cmap='GnBu_r')
-                else:
-                    ax[i,j].imshow(matrices[i*width+j], cmap='gray')
-                # if i*width+j in [38, 26, 55, 48]: # human
-                #     # set the border of the selected channels
-                #     for spine in ax[i,j].spines.values():
-                #         spine.set_edgecolor('green')
-                #         spine.set_linewidth(10)
-        plt.savefig(os.path.join(save_path, 'matrices.png'))
-        plt.close()
-        # plot indicator matrices
-        width = int(math.sqrt(num_channels))+1
-        fig, ax = plt.subplots(nrows=width, ncols=width, figsize=(20,20))
-        for m in indicator_matrices:
-            m.astype(int)
-        for i in range(width):
-            for j in range(width):
-                if i*width+j >= num_channels:
-                    break
-                if i*width+j in result:
-                    ax[i,j].imshow(indicator_matrices[i*width+j], cmap='GnBu_r')
-                else:
-                    ax[i,j].imshow(indicator_matrices[i*width+j], cmap='gray')
-                # if i*width+j in [38, 26, 55, 48]: # human
-                #     # set the border of the selected channels
-                #     for spine in ax[i,j].spines.values():
-                #         spine.set_edgecolor('green')
-                #         spine.set_linewidth(10)
-                # ax[i,j].imshow(indicator_matrices[i*width+j], cmap='gray')
-        plt.savefig(os.path.join(save_path, 'indicator_matrices.png'))
-        plt.close()
-        # plot true matrix
-        plt.imshow(true_matrix)
-        plt.savefig(os.path.join(save_path, 'true_matrix.png'))
-        plt.close()
-    return result
+    return matrices, true_matrix, corr_matrix
