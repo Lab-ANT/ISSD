@@ -33,7 +33,9 @@ def issd(datalist, state_seq_list, K,
         matrices.append(matrices_.reshape(matrices_.shape[0], -1)) # flatten 1,2 dim
         true_matrices.append(true_matrix_.flatten())
         corr_matrices.append(corr_matrix_)
-        
+    corr_matrices = np.array(corr_matrices).mean(axis=0)
+    clusters = cluster_corr(corr_matrices, threshold=clustering_threshold)
+    
     # QF strategy
     if len(matrices) == 1:
         stacked_matrices = matrices[0]
@@ -41,8 +43,6 @@ def issd(datalist, state_seq_list, K,
     else:
         stacked_matrices = np.hstack(matrices)
         stacked_true_matrices = np.hstack(true_matrices)
-    corr_matrices = np.array(corr_matrices).mean(axis=0)
-    clusters = cluster_corr(corr_matrices, threshold=clustering_threshold)
     # print(matrices.shape, true_matrices.shape, corr_matrices.shape)
     idx_inner = np.argwhere(stacked_true_matrices==True)
     idx_inter = np.argwhere(stacked_true_matrices==False)
@@ -96,6 +96,7 @@ def issd(datalist, state_seq_list, K,
         idx = candidate_idx[np.argmax(interval[candidate_idx])]
         selected_channels_cf.append(idx)
         masked_idx[idx] = True
+        masked_idx[clusters==clusters[idx]] = True
         current_matrix = matrix_OR(indicator_matrices[selected_channels_cf])
 
     return selected_channels_qf, selected_channels_cf
