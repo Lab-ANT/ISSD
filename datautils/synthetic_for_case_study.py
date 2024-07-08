@@ -1,5 +1,4 @@
 """
-Created by Chengyu on 2024/1/5.
 Synthetic data generator.
 The generated data has been provided along with the paper.
 If you want to use this script, please install the TSAGen tool
