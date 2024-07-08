@@ -16,6 +16,22 @@ selected_channels_cf = selector.get_cf_solution(4)
 print(f'ISSD-QF selected channels: {selected_channels_qf}')
 print(f'ISSD-CF selected channels: {selected_channels_cf}')
 
+# Select on multiple time series
+fname_list = os.listdir('data/MoCap/raw')
+fname_list.sort()
+fname_list = fname_list[:len(fname_list)//2]
+datalist = []
+state_seq_list = []
+for fname in fname_list:
+    data, state_seq = load_data(f'data/MoCap/raw/{fname}')
+    datalist.append(data)
+    state_seq_list.append(state_seq)
+selector.compute_matrices(datalist, state_seq_list)
+selected_channels_qf = selector.get_qf_solution(4)
+selected_channels_cf = selector.get_cf_solution(4)
+print(f'ISSD-QF selected channels (milti-ts version): {selected_channels_qf}')
+print(f'ISSD-CF selected channels (milti-ts version): {selected_channels_cf}')
+
 # EXAMPLE OF ISSD, select on one time series
 # example_data, state_seq = load_data('data/MoCap/raw/86_02.npy')
 # selected_channels_qf, selected_channels_cf = issd([example_data], [state_seq], 4)
