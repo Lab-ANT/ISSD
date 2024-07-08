@@ -11,6 +11,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from miniutils import *
+import time
 # ISSD
 from issd import issd
 from sklearn.feature_selection import mutual_info_regression
@@ -69,11 +70,6 @@ if method == 'issd':
     for fname in tqdm.tqdm(fname_list):
         data, label = load_data(os.path.join(raw_data_path, fname))
         num_channels = data.shape[1]
-        # result = issd(data,
-        #             label,
-        #             n_components,
-        #             strategy='qf', # qf strategy
-        #             save_path=f'output/issd-qf/{dataset}/{fname[:-4]}')
         result = issd(data,
                     label,
                     n_components,
@@ -140,6 +136,7 @@ elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
     part1_list = fname_list[:len(fname_list)//2]
     part2_list = fname_list[len(fname_list)//2:]
     
+    time_start = time.time()
     for i in range(2):
         # rotate the dataset
         if i == 0:
@@ -208,9 +205,12 @@ elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
                 data_reduced = lda.transform(data)
                 data_reduced = np.vstack((data_reduced.T, state_seq)).T
                 np.save(os.path.join(f'data/{dataset}/{method}', fn_test), data_reduced)
+    time_end = time.time()
+    print(f'time taken for {method}: {time_end-time_start} seconds')
 
 # reduction methods
 elif method in ['pca', 'umap']:
+    time_start = time.time()
     for fname in tqdm.tqdm(fname_list):
         data = np.load(os.path.join(raw_data_path, fname), allow_pickle=True)
         data_raw = data[:,:-1]
@@ -222,3 +222,5 @@ elif method in ['pca', 'umap']:
             data_reduced = umap.UMAP(n_components=n_components).fit_transform(data_raw)
             data_reduced = np.vstack((data_reduced.T, label)).T
         np.save(os.path.join(f'data/{dataset}/{method}', fname), data_reduced)
+    time_end = time.time()
+    print(f'time taken for {method}: {time_end-time_start} seconds')
