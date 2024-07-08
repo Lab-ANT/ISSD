@@ -1,5 +1,4 @@
 """
-Created by Chengyu on 2023/11/15.
 This script generates the example figure in the paper and should not be published.
 """
 

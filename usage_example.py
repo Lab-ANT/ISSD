@@ -1,8 +1,3 @@
-"""
-Created by Chengyu on 2024/3/10.
-This is an example of how to use the ISSD and IRSD.
-"""
-
 from issd import issd, ISSD
 from miniutils import *
 import os

@@ -1,5 +1,4 @@
 """
-Created by Chengyu on 2023/11/16.
 This script summarizes the results of the experiments.
 The results of baselines and downstream tasks are saved in the output folder.
 """

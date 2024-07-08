@@ -1,5 +1,4 @@
 """
-Created by Chengyu on 2024/1/28.
 This is a case study of ISSD and baselines on the MoCap dataset,
 which intuitively shows the selection results of each method.
 The output figure is saved in output/case-studies/
