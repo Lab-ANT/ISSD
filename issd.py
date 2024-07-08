@@ -9,6 +9,110 @@ from miniutils import *
 import multiprocessing
 import os
 
+class ISSD:
+    def __init__(self,
+         clustering_threshold=0.2,
+         num_samples=30,
+         min_seg_len_to_exclude=100,
+         test_method='nn',
+         n_jobs=10) -> None:
+        self.clustering_threshold = clustering_threshold
+        self.num_samples = num_samples
+        self.min_seg_len_to_exclude = min_seg_len_to_exclude
+        self.test_method = test_method
+        self.n_jobs = n_jobs
+
+    def compute_matrices(self, datalist, state_seq_list):
+        self.matrices = []
+        self.true_matrices = []
+        self.corr_matrices = []
+        for data, state_seq in zip(datalist, state_seq_list):
+            matrices_, true_matrix_, corr_matrix_ = compute_matrices(data,
+                                                                state_seq, 
+                                                                self.num_samples,
+                                                                self.min_seg_len_to_exclude,
+                                                                self.test_method,
+                                                                self.n_jobs)
+            # print(matrices_.shape, true_matrix_.shape, corr_matrix_.shape)
+            # matrices_: (num_channels, num_segs, num_segs)
+            # true_matrix_: (num_segs, num_segs)
+            # corr_matrix_: (num_channels, num_channels)
+
+            self.matrices.append(matrices_.reshape(matrices_.shape[0], -1)) # flatten 1,2 dim
+            self.true_matrices.append(true_matrix_.flatten())
+            self.corr_matrices.append(corr_matrix_)
+        self.corr_matrices = np.array(self.corr_matrices).mean(axis=0)
+        self.clusters = cluster_corr(self.corr_matrices, threshold=self.clustering_threshold)
+    
+    def get_qf_solution(self, K):
+        # QF strategy
+        if len(self.matrices) == 1:
+            stacked_matrices = self.matrices[0]
+            stacked_true_matrices = self.true_matrices[0]
+        else:
+            stacked_matrices = np.hstack(self.matrices)
+            stacked_true_matrices = np.hstack(self.true_matrices)
+        # print(matrices.shape, true_matrices.shape, corr_matrices.shape)
+        idx_inner = np.argwhere(stacked_true_matrices==True)
+        idx_inter = np.argwhere(stacked_true_matrices==False)
+        mean_inner = np.mean(stacked_matrices[:,idx_inner], axis=1).flatten()
+        mean_inter = np.mean(stacked_matrices[:,idx_inter], axis=1).flatten()
+        interval = mean_inter - mean_inner
+
+        selected_channels_qf = []
+        masked_idx = np.array([False]*len(mean_inner))
+        while len(selected_channels_qf) < K:
+            remaining_idx = np.argwhere(~masked_idx).flatten()
+            if len(remaining_idx) == 0:
+                print('No more channels to select.')
+                break
+            # select the idx with the maximum mean interval
+            idx = remaining_idx[np.argmax(interval[remaining_idx])]
+            selected_channels_qf.append(idx)
+            # mask the idx and the idx with the same cluster
+            masked_idx[idx] = True
+            masked_idx[self.clusters==self.clusters[idx]] = True
+        self.selected_channels_qf = selected_channels_qf
+        return selected_channels_qf
+
+    def get_cf_solution(self, K):
+        # CF strategy
+        ts_interval = []
+        indicator_matrices = []
+        for ts_matrices, ts_true_matrix in zip(self.matrices, self.true_matrices):
+            idx_inner = np.argwhere(ts_true_matrix==True)
+            idx_inter = np.argwhere(ts_true_matrix==False)
+            mean_inner = np.mean(ts_matrices[:,idx_inner], axis=1).flatten()
+            mean_inter = np.mean(ts_matrices[:,idx_inter], axis=1).flatten()
+            max_inner = np.max(ts_matrices[:,idx_inner], axis=1).flatten()
+            interval = mean_inter - mean_inner
+            ts_interval.append(interval)
+            indicator_matrices_ = [m>tau for m, tau in zip(ts_matrices, max_inner)]
+            indicator_matrices_ = np.array(indicator_matrices_, dtype=bool)
+            indicator_matrices.append(indicator_matrices_)
+        interval = np.array(ts_interval).mean(axis=0)
+        if len(indicator_matrices) == 1:
+                indicator_matrices = indicator_matrices[0]
+        else:
+            indicator_matrices = np.hstack(indicator_matrices)
+
+        selected_channels_cf = []
+        masked_idx = np.array([False]*len(mean_inner))
+
+        current_matrix = np.zeros(indicator_matrices.shape).astype(bool)
+        while len(selected_channels_cf) < K:
+            remaining_idx = np.argwhere(~masked_idx).flatten()
+            costlist = np.array([cost(m, current_matrix) for m in indicator_matrices])
+            candidate_c = np.max(costlist[remaining_idx])
+            candidate_idx = remaining_idx[np.argwhere(costlist[remaining_idx]==candidate_c).flatten()]
+            idx = candidate_idx[np.argmax(interval[candidate_idx])]
+            selected_channels_cf.append(idx)
+            masked_idx[idx] = True
+            masked_idx[self.clusters==self.clusters[idx]] = True
+            current_matrix = matrix_OR(indicator_matrices[selected_channels_cf])
+        self.selected_channels_cf = selected_channels_cf
+        return selected_channels_cf
+        
 def issd(datalist, state_seq_list, K,
          clustering_threshold=0.2,
          num_samples=30,
