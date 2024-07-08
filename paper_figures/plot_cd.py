@@ -215,8 +215,10 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
               (textspace - 0.1, chei)],
              linewidth=linewidth)
         if labels:
+            # text(textspace + 0.6, chei - 0.075, format(ssums[i], '.4f'),
+            #      ha="right", va="center", size=12, color='#497fc0', fontweight='bold')
             text(textspace + 0.6, chei - 0.075, format(ssums[i], '.4f'),
-                 ha="right", va="center", size=12, color='#497fc0', fontweight='bold')
+                 ha="right", va="center", size=12, fontweight='bold')
         text(textspace - 0.2, chei, filter_names(nnames[i]),
              ha="right", va="center", size=16)
 
@@ -227,8 +229,10 @@ def graph_ranks(avranks, names, p_values, cd=None, cdmethod=None, lowv=None, hig
               (textspace + scalewidth + 0.1, chei)],
              linewidth=linewidth)
         if labels:
+            # text(textspace + scalewidth - 0.6, chei - 0.075, format(ssums[i], '.4f'),
+            #      ha="left", va="center", size=12, color='#497fc0', fontweight='bold')
             text(textspace + scalewidth - 0.6, chei - 0.075, format(ssums[i], '.4f'),
-                 ha="left", va="center", size=12, color='#497fc0', fontweight='bold')
+                 ha="left", va="center", size=12, fontweight='bold')
         text(textspace + scalewidth + 0.2, chei, filter_names(nnames[i]),
              ha="left", va="center", size=16)
 
@@ -310,7 +314,8 @@ def draw_cd_diagram(df_perf=None, alpha=0.05, title=None, labels=False):
         }
     if title:
         plt.title(title,fontdict=font, y=0.9, x=0.5)
-    plt.savefig(os.path.join(result_path, out_file_name), bbox_inches='tight')
+    plt.savefig(os.path.join(result_path, out_file_name+'.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(result_path, out_file_name+'.pdf'), bbox_inches='tight')
 
 def wilcoxon_holm(alpha=0.05, df_perf=None):
     """
@@ -497,7 +502,7 @@ for metric in ['ari', 'nmi', 'purity']:
         print(df.shape)
 
     # result_file_path = 'output/summary_ari.csv'
-    out_file_name = f'CD_{metric}.png'
+    out_file_name = f'CD_{metric}'
     df_perf = pd.read_csv(f'output/summary_{metric}.csv', index_col=False)
     if metric == 'ari':
         draw_cd_diagram(df_perf=df_perf, title='ARI Rank', labels=True, alpha=0.05)
