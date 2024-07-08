@@ -11,11 +11,12 @@ import os
 
 class ISSD:
     def __init__(self,
-         clustering_threshold=0.2,
-         num_samples=30,
-         min_seg_len_to_exclude=100,
-         test_method='nn',
-         n_jobs=10) -> None:
+        clustering_threshold=0.2,
+        num_samples=30,
+        min_seg_len_to_exclude=100,
+        test_method='nn',
+        n_jobs=10) -> None:
+
         self.clustering_threshold = clustering_threshold
         self.num_samples = num_samples
         self.min_seg_len_to_exclude = min_seg_len_to_exclude
