@@ -585,25 +585,34 @@ def compact_matrix(state_seq):
     compact_true_matrix = compact_true_matrix==1
     return compact_true_matrix
 
-def cluster_corr(corr_array, threshold=0.2, inplace=False):
-    """
-    Rearranges the correlation matrix, corr_array, so that groups of highly 
-    correlated variables are next to eachother 
+# def cluster_corr(corr_array, threshold=0.2, inplace=False):
+#     """
+#     Rearranges the correlation matrix, corr_array, so that groups of highly 
+#     correlated variables are next to eachother 
     
-    Parameters
-    ----------
-    corr_array : pandas.DataFrame or numpy.ndarray
-        a NxN correlation matrix 
+#     Parameters
+#     ----------
+#     corr_array : pandas.DataFrame or numpy.ndarray
+#         a NxN correlation matrix 
         
-    Returns
-    -------
-    pandas.DataFrame or numpy.ndarray
-        a NxN correlation matrix with the columns and rows rearranged
-    """
-    pairwise_distances = corr_array
-    linkage = sch.linkage(pairwise_distances, method='complete')
-    cluster_array = sch.fcluster(linkage, threshold, criterion='distance')
-    return cluster_array
+#     Returns
+#     -------
+#     pandas.DataFrame or numpy.ndarray
+#         a NxN correlation matrix with the columns and rows rearranged
+#     """
+#     pairwise_distances = corr_array
+#     linkage = sch.linkage(pairwise_distances, method='complete')
+#     cluster_array = sch.fcluster(linkage, threshold, criterion='distance')
+#     return cluster_array
+
+def cluster_corr(correlation_matrix, threshold=0.2):
+    # Flatten the correlation matrix
+    condensed_matrix = sch.distance.squareform(1 - correlation_matrix)
+    # Perform hierarchical clustering
+    linkage_matrix = sch.linkage(condensed_matrix, method='average')
+    # Obtain clusters based on the threshold
+    clusters = sch.fcluster(linkage_matrix, threshold, criterion='distance')
+    return clusters
 
 def pair_wise_nntest(segments, n, k, method='nn'):
     """

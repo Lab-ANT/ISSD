@@ -3,7 +3,7 @@ from miniutils import *
 import os
 
 # EXAMPLE OF ISSD, select on one time series
-example_data, state_seq = load_data('data/MoCap/raw/86_02.npy')
+example_data, state_seq = load_data('data/ActRecTut/raw/86_02.npy')
 selector = ISSD()
 selector.compute_matrices([example_data], [state_seq])
 selected_channels_qf = selector.get_qf_solution(4)

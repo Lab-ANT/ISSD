@@ -40,6 +40,9 @@ import os
 # np.save('time_consumed.npy', time_consumed)
 
 time_consumed = np.load('time_consumed.npy')
+# switch 0,2 axis
+time_consumed = time_consumed[:,[1,2,0]]
+
 print(time_consumed)
 # time_consumed[:,1] = time_consumed[:,1]*1000
 # time_consumed[:,2] = time_consumed[:,2]*1000
@@ -51,8 +54,19 @@ ax.plot(range(1,11), time_consumed[:,0], label='nntest', marker='o')
 ax.plot(range(1,11), time_consumed[:,1], label='QF searching', marker='^')
 ax.plot(range(1,11), time_consumed[:,2], label='CF searching', marker='s')
 # plt.stackplot(range(1,11), time_consumed.T, labels=['NN', 'QF', 'CF'])
+
+# year = range(1,11)
+# time_con = {
+#     'QF': time_consumed[:,1],
+#     'CF': time_consumed[:,2],
+#     'NN': time_consumed[:,0],
+# }
+
+# ax.stackplot(year, time_con.values(),
+#              labels=time_con.keys(), alpha=0.8)
+
 # log the y-axis
-ax.set_yscale('log')
+# ax.set_yscale('log')
 ax.set_xlabel('Number of threads')
 ax.set_ylabel('Computation Time (s)')
 # ax.set_title('Time taken for different number of threads')
