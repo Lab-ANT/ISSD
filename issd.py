@@ -8,6 +8,9 @@ import numpy as np
 from miniutils import *
 import multiprocessing
 import os
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.decomposition import PCA
+from sklearn.feature_selection import mutual_info_regression
 
 class ISSD:
     def __init__(self,
@@ -15,15 +18,19 @@ class ISSD:
         num_samples=30,
         min_seg_len_to_exclude=100,
         test_method='nn',
+        inte_strategy='lda',
         n_jobs=10) -> None:
 
         self.clustering_threshold = clustering_threshold
         self.num_samples = num_samples
         self.min_seg_len_to_exclude = min_seg_len_to_exclude
         self.test_method = test_method
+        self.inte_strategy = inte_strategy
         self.n_jobs = n_jobs
 
     def compute_matrices(self, datalist, state_seq_list):
+        self.datalist = datalist
+        self.state_seq_list = state_seq_list
         self.matrices = []
         self.true_matrices = []
         self.corr_matrices = []
@@ -73,7 +80,7 @@ class ISSD:
             # mask the idx and the idx with the same cluster
             masked_idx[idx] = True
             masked_idx[self.clusters==self.clusters[idx]] = True
-        self.selected_channels_qf = selected_channels_qf
+        self.qf_solution = selected_channels_qf
         return selected_channels_qf
 
     def get_cf_solution(self, K):
@@ -111,8 +118,39 @@ class ISSD:
             masked_idx[idx] = True
             masked_idx[self.clusters==self.clusters[idx]] = True
             current_matrix = matrix_OR(indicator_matrices[selected_channels_cf])
-        self.selected_channels_cf = selected_channels_cf
+        self.cf_solution = selected_channels_cf
         return selected_channels_cf
+
+    def fit(self, datalist, state_seq_list, K):
+        self.compute_matrices(datalist, state_seq_list)
+        self.get_qf_solution(K)
+        self.get_cf_solution(K)
+        self.inte_qf_cf()
+
+    def inte_qf_cf(self):
+        score_qf = 0
+        score_cf = 0
+        for data, state_seq in zip(self.datalist, self.state_seq_list):
+            reduced_data_issd_qf = data[:,self.selected_channels_qf]
+            reduced_data_issd_cf = data[:,self.selected_channels_cf]
+            if self.inte_strategy == 'lda':
+                lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+                score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
+                lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+                score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
+            elif self.inte_strategy == 'pca':
+                pca_issd_qf = PCA(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+                score_qf += np.sum(mutual_info_regression(pca_issd_qf, state_seq))
+                pca_issd_cf = PCA(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+                score_cf += np.sum(mutual_info_regression(pca_issd_cf, state_seq))
+            elif self.inte_strategy == 'mi':
+                score_qf += np.sum(mutual_info_regression(reduced_data_issd_qf, state_seq))
+                score_cf += np.sum(mutual_info_regression(reduced_data_issd_cf, state_seq))
+
+        if score_qf >= score_cf:
+            self.solution = self.qf_solution
+        else:
+            self.solution = self.cf_solution
         
 def issd(datalist, state_seq_list, K,
          clustering_threshold=0.2,
