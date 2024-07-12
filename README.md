@@ -1,8 +1,6 @@
 # Note
 This is the repository for the paper entitled "ISSD: Indicator Selection for Time Series State Detection".
 
-If you encounter any problems, please contact chengyu@nudt.edu.cn or raise an issue.
-
 # Usage
 If you only want to use ISSD, please refer to ```usage_example.py```, which contains detailed examples of ISSD.  
 Note that the master branch is mainly for the reproducibility, A lite version of ISSD will soon be available at the lite branch.
