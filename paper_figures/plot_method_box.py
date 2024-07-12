@@ -15,6 +15,8 @@ def convert_name(str):
     else:
         return str
 
+os.makedirs('output/figs', exist_ok=True)
+
 for metric in ['nmi']:
     with open(f'output/summary_{metric}.txt', 'r') as f:
         # retrieve method names
@@ -71,12 +73,13 @@ for metric in ['nmi']:
         # box plot
         plt.style.use('classic')
         plt.rcParams['pdf.fonttype'] = 42
-        plt.figure(figsize=(4.3, 4))
+        plt.figure(figsize=(4, 4))
         # plt.boxplot(avg_score_on_datasets.T, patch_artist=True, showfliers=False)
         # use bold line for all the components
         plt.boxplot(t.T,
             patch_artist=True,
-            # whis=[0,100],
+            whis=[0,100],
+            widths=0.5,
             showfliers=True,
             boxprops=dict(linewidth=1.5),
             whiskerprops=dict(linewidth=1.5),
@@ -86,11 +89,11 @@ for metric in ['nmi']:
         dmethod_name_list = [convert_name(name) for name in dmethod_name_list]
         plt.ylim(-0.05,1)
         plt.xticks(range(1, num_dmethods+1), dmethod_name_list, fontsize=12)
-        plt.title(f'{dataset}', fontsize=16)
+        plt.title(f'{dataset}', fontsize=18)
         # plt.grid(axis='y', lw=2, linestyle='--', color='gray')
         # plt.ylim(0.35, 0.85)
-        plt.ylabel('NMI', fontsize=16)
-        plt.xlabel('Downstream Methods', fontsize=16)
+        plt.ylabel('NMI', fontsize=18)
+        plt.xlabel('Downstream Methods', fontsize=18)
         plt.tight_layout()
         plt.savefig(f'output/figs/resilience_{dataset}_{metric}.pdf', bbox_inches='tight')
         plt.savefig(f'output/figs/resilience_{dataset}_{metric}.png', bbox_inches='tight')
