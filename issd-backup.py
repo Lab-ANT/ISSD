@@ -1,5 +1,4 @@
 """
-Created by Chengyu on 2024/1/9.
 Indicator Selection for State Detection.
 ISSD v1.0.
 """
