@@ -116,7 +116,8 @@ for metric in ['nmi']:
     # use bold line for all the components
     plt.boxplot(avg_score_on_datasets.T,
         patch_artist=True,
-        # whis=[0,100],
+        whis=[0,100],
+        widths=0.5,
         showfliers=True,
         boxprops=dict(linewidth=1.5),
         whiskerprops=dict(linewidth=1.5),

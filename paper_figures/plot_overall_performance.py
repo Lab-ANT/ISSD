@@ -69,7 +69,7 @@ for metric in ['ari', 'purity', 'nmi']:
         ax[i].bar(method_name_list,
                     avg_scores,
                     width=0.5,
-                    color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4'])
+                    color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4', '#00B4B7', '#008F9D', '#916142'])
         # rotate the x-axis label
         ax[i].tick_params(axis='x', rotation=45)
         ax[i].grid(axis='y', lw=2, linestyle='--', color='gray')
@@ -84,16 +84,34 @@ for metric in ['ari', 'purity', 'nmi']:
         elif metric == 'nmi':
             ax[i].set_ylabel('NMI', fontsize=17)
         ax[i].yaxis.labelpad = -1
+
+        # # Count the best results obtained by each method from the table and add a star to the top two ranked methods
+        # # sort the average scores in descending order
+        # sort_idx = np.argsort(avg_scores)[::-1]
+        # # find the maximum value and its index
+        # max_val = avg_scores[sort_idx[0]]
+        # max_idx = sort_idx[0]
+        # # find the second maximum value and its index
+        # second_max_val = avg_scores[sort_idx[1]]
+        # second_max_idx = sort_idx[1]
+        # # set the y-axis limit
+        # ax[i].set_ylim(0, max_val*1.2)
+        # # add a red star to the best method
+        # ax[i].scatter(max_idx, max_val+0.08, color='red', s=120, marker='*')
+        # # add a blue star to the second best method
+        # ax[i].scatter(second_max_idx, second_max_val+0.08, color='#5D8AA8', s=120, marker='*')
+        
         # add starts to the best and second best
-        sort_idx = np.argsort(avg_scores)[::-1]
-        max_val = avg_scores[sort_idx[0]]
-        max_idx = sort_idx[0]
-        second_max_val = avg_scores[sort_idx[1]]
-        second_max_idx = sort_idx[1]
+        # sort_idx = np.argsort(avg_scores)[::-1]
+        # max_val = avg_scores[sort_idx[0]]
+        # max_idx = sort_idx[0]
+        # second_max_val = avg_scores[sort_idx[1]]
+        # second_max_idx = sort_idx[1]
         # if max_val*1.1 > 100:
         #     ax[i].set_ylim(0, max_val*1.2)
-        ax[i].scatter(max_idx, max_val+0.08, color='red', s=120, marker='*')
-        ax[i].scatter(second_max_idx, second_max_val+0.08, color='#5D8AA8', s=120, marker='*')
+        # ax[i].scatter(max_idx, max_val+0.08, color='red', s=120, marker='*')
+        # ax[i].scatter(second_max_idx, second_max_val+0.08, color='#5D8AA8', s=120, marker='*')
+        ax[i].set_xlim(-0.7, len(method_name_list)-0.3)
     plt.tight_layout()
     plt.savefig(f'output/figs/overall_performance_{metric}.png', bbox_inches='tight')
     plt.savefig(f'output/figs/overall_performance_{metric}.pdf', bbox_inches='tight')
