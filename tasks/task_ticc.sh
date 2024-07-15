@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # list of methods to run
-method_list=(issd issd-qf issd-cf pca umap ecs ecp lda sfm)
-# method_list=(issd issd-qf issd-cf)
+# method_list=(issd issd-qf issd-cf pca umap ecs ecp lda sfm)
+method_list=(issd issd-qf issd-cf)
 dataset_list=(PAMAP2 USC-HAD MoCap ActRecTut SynSeg)
 
 # check if the argument is specified,
