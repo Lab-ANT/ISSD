@@ -27,9 +27,6 @@ from sklearn.feature_selection import SelectFromModel
 # umap and pca
 import umap
 from sklearn.decomposition import PCA
-# SFS
-from sklearn.feature_selection import SequentialFeatureSelector
-from sklearn.neighbors import KNeighborsClassifier
 # surpress warnings, which are harmless
 import warnings
 warnings.filterwarnings("ignore")

@@ -126,7 +126,7 @@ class ISSD:
         self.get_cf_solution(K)
         self.inte_qf_cf()
 
-    def inte_qf_cf(self):
+    def inte_solution(self):
         score_qf = 0
         score_cf = 0
         for data, state_seq in zip(self.datalist, self.state_seq_list):

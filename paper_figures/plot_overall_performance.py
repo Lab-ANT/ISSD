@@ -72,6 +72,8 @@ for metric in ['ari', 'purity', 'nmi']:
                     color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4', '#00B4B7', '#008F9D', '#916142'])
         # rotate the x-axis label
         ax[i].tick_params(axis='x', rotation=45)
+        # set x-axis label font size
+        ax[i].tick_params(axis='x', labelsize=9)
         ax[i].grid(axis='y', lw=2, linestyle='--', color='gray')
         # put grid behind the bars
         # ax[i].set_axisbelow(True)

@@ -37,6 +37,7 @@ os.makedirs(output_path, exist_ok=True)
 for fname in f_list:
     data, label = load_data(os.path.join(script_path, f'../data/{dataset}/raw/', fname))
     data = StandardScaler().fit_transform(data)
+    print(data.shape, label.shape)
 
     num_channels = data.shape[1]
     channel_prediction_list = [] # save the prediction results of each channel
@@ -62,5 +63,4 @@ for fname in f_list:
     # save the prediction results and ground truth
     channel_prediction_list.append(label)
     result = np.vstack(channel_prediction_list).T # the last channel is label
-    print(result.shape)
     np.save(os.path.join(output_path, fname), result)

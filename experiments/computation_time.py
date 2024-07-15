@@ -1,3 +1,5 @@
+import sys
+sys.path.append('.')
 from issd import ISSD
 from miniutils import *
 import time
@@ -5,9 +7,10 @@ import os
 import json
 
 data_json = {
-    'QF': [],
-    'CF': [],
-    'NN': []
+    'QF Searching': [],
+    'CF Searching': [],
+    'nntest': [],
+    'Integration': [],
 }
 
 for dataset in ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']:
@@ -29,10 +32,14 @@ for dataset in ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']:
     start_cf = time.time()
     selected_channels_cf = selector.get_cf_solution(4)
     end_cf = time.time()
+    start_inte = time.time()
+    selected_channels_cf = selector.inte_solution(4)
+    end_inte = time.time()
     print(f'time taken for {dataset} iteration: {end_cf-start_nn} seconds')
-    data_json['QF'].append(end_qf-start_qf)
-    data_json['CF'].append(end_cf-start_cf)
-    data_json['NN'].append(end_nn-start_nn)
+    data_json['QF Searching'].append(end_qf-start_qf)
+    data_json['CF Searching'].append(end_cf-start_cf)
+    data_json['nntest'].append(end_nn-start_nn)
+    data_json['Integration'].append(end_inte-start_inte)
 
 with open('time_consumed.json', 'w') as f:
     json.dump(data_json, f)

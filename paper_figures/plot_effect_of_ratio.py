@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import normalized_mutual_info_score
 import numpy as np
 
-plt.style.use('classic')
-
 nmi_list_per_method = []
 for method in ['time2state', 'e2usd', 'ticc', 'autoplait']:
     if method in ['time2state', 'e2usd']:
@@ -27,18 +25,19 @@ print(nmi_list_per_method[0])
 
 plt.style.use('classic')
 plt.rcParams['pdf.fonttype'] = 42
-# plt.figure(figsize=(4.5,4))
 plt.figure(figsize=(8,4))
-plt.plot(nmi_list_per_method[0], label='Time2State', marker='D', lw=3, markersize=8)
-plt.plot(nmi_list_per_method[1], label='E2USD', marker='s', lw=3, markersize=8)
-plt.plot(nmi_list_per_method[2], label='TICC', marker='o', lw=3, markersize=8)
-plt.plot(nmi_list_per_method[3], label='AutoPlait', marker='^', lw=3, markersize=8)
-# here are some optional markers: '*', 's', 'o', '^', 'D', 'v', 'x', 'p', 'h'
+plt.plot(nmi_list_per_method[0], label='Time2State', marker='D', lw=3, markersize=8, color='#00922F')
+plt.plot(nmi_list_per_method[1], label='E2USD', marker='s', lw=3, markersize=8, color='#00B4B7')
+plt.plot(nmi_list_per_method[2], label='TICC', marker='o', lw=3, markersize=8, color='#c9393e')
+plt.plot(nmi_list_per_method[3], label='AutoPlait', marker='^', lw=3, markersize=8, color='#497fc0')
+# optional markers: '*', 's', 'o', '^', 'D', 'v', 'x', 'p', 'h'
 
 # add a vertical dashed line at x=5
 plt.axvline(x=4, color='gray', linestyle='--', lw=2)
+plt.axvline(x=6, color='gray', linestyle='--', lw=2)
 # add a note to the vertical line, use bold font
-plt.text(4.1, 0.5, '50%', fontsize=12, fontweight='bold', color='gray')
+plt.text(4.1, 0.6, '50%', fontsize=12, fontweight='bold', color='gray')
+plt.text(6.1, 0.6, '70%', fontsize=12, fontweight='bold', color='gray')
 
 plt.ylim(0,1.05)
 plt.yticks(fontsize=12)

@@ -61,7 +61,6 @@ for metric in ['nmi']:
     table = table/100
     num_dmethods = len(dmethod_name_list)
     num_datasets = int(table.shape[0]/num_dmethods)
-    print(table.shape)
 
     print(dataset_names)
     for i, dataset in enumerate(dataset_names):
