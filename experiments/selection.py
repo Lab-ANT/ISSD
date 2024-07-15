@@ -125,7 +125,7 @@ if method == 'issd':
             print('issd', s_qf, s_cf, fname)
             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
             np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
-            # np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
+            np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
             np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
 
 elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
