@@ -13,10 +13,11 @@ width = 0.2
 # bottom = np.zeros(len(species))
 offset = -0.3
 x = np.array([1,2,3,4,5])
-colors = color=['#ecd268', '#c9393e', '#497fc0']
+colors = color=['#ecd268', '#c9393e', '#9694e7', '#497fc0']
 i = 0
 for boolean, weight_count in data_json.items():
-    ax.bar(x+offset, weight_count, width, label=boolean, color=colors[i], edgecolor=colors[i])
+    # ax.bar(x+offset, weight_count, width, label=boolean, color=colors[i], edgecolor=colors[i])
+    ax.bar(x+offset, weight_count, width, label=boolean, color=colors[i])
     offset += width
     i+=1
 ax.set_xticks(x)
@@ -37,7 +38,7 @@ ax.tick_params(axis='y', labelsize=14)
 ax.yaxis.set_tick_params(right=False)
 # hide right ticks
 ax.yaxis.set_ticks_position('left')
-ax.legend(fontsize=12)
+plt.legend(fontsize=13, loc='upper center', ncol=2)
 plt.tight_layout()
 plt.savefig('time_datasets.png')
 plt.savefig('time_datasets.pdf')
