@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.metrics import normalized_mutual_info_score, adjusted_mutual_info_score, confusion_matrix
 import prettytable as pt
 
-methods = ['issd', 'issd-qf', 'issd-cf', 'raw', 'pca', 'umap', 'ecp', 'ecs', 'lda', 'sfm']
+methods = ['issd', 'issd-qf', 'issd-cf', 'raw', 'pca', 'umap', 'ecp', 'ecs', 'lda', 'sfm', 'sfs', 'mi']
 # methods = ['issd', 'raw', 'pca', 'umap', 'ecp', 'ecs', 'lda', 'sfm']
 downstream_methods = ['time2state', 'ticc', 'autoplait', 'e2usd']
 datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']

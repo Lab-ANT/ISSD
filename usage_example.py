@@ -3,13 +3,15 @@ from miniutils import *
 import os
 
 # EXAMPLE OF ISSD, select on one time series
-example_data, state_seq = load_data('data/ActRecTut/raw/86_02.npy')
+example_data, state_seq = load_data('data/MoCap/raw/86_02.npy')
 selector = ISSD()
 selector.compute_matrices([example_data], [state_seq])
-selected_channels_qf = selector.get_qf_solution(4)
-selected_channels_cf = selector.get_cf_solution(4)
+selected_channels_qf = selector.get_qf_solution(3)
+selected_channels_cf = selector.get_cf_solution(3)
+true_cf_solution = selector.exhaustively_search_cf(3)
 print(f'ISSD-QF selected channels: {selected_channels_qf}')
 print(f'ISSD-CF selected channels: {selected_channels_cf}')
+print(f'ISSD-CF selected channels: {true_cf_solution}')
 
 # Select on multiple time series
 fname_list = os.listdir('data/MoCap/raw')
@@ -25,8 +27,10 @@ selector = ISSD()
 selector.compute_matrices(datalist, state_seq_list)
 selected_channels_qf = selector.get_qf_solution(4)
 selected_channels_cf = selector.get_cf_solution(4)
+true_cf_solution = selector.exhaustively_search_cf(4)
 print(f'ISSD-QF selected channels (milti-ts version): {selected_channels_qf}')
 print(f'ISSD-CF selected channels (milti-ts version): {selected_channels_cf}')
+print(f'ISSD-CF selected channels (milti-ts version): {true_cf_solution}')
 
 # EXAMPLE OF ISSD, select on one time series
 # example_data, state_seq = load_data('data/MoCap/raw/86_02.npy')
