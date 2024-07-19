@@ -12,7 +12,7 @@ import prettytable as pt
 datasets = ['PAMAP2', 'SynSeg', 'MoCap', 'ActRecTut', 'USC-HAD']
 
 pretty_table = pt.PrettyTable()
-columns = ['length (k)', '# channels', '# states', '# segments', '# duration (k)']
+columns = ['length (k)', '# channels', '# states', '# segments', '# duration (k)', 'total states']
 pretty_table.field_names = ['Datasets'] + columns
 
 for dname in datasets:
@@ -25,6 +25,7 @@ for dname in datasets:
     num_state_list = []
     num_segs_list = []
     seg_len_list = []
+    set_states = []
     for fname in f_list:
         # data = np.load(os.path.join(dataset_path, fname), allow_pickle=True)
         data, state_seq = load_data(os.path.join(dataset_path, fname))
@@ -40,6 +41,7 @@ for dname in datasets:
         length_list.append(length)
         num_state_list.append(num_state)
         num_segs_list.append(num_segs)
+        set_states += list(np.unique(state_seq))
     min_num_states = min(num_state_list)
     max_num_states = max(num_state_list)
     min_num_segs = min(num_segs_list)
@@ -48,10 +50,12 @@ for dname in datasets:
     max_length = max(length_list)/1000
     min_seg_len = min(seg_len_list)/1000
     max_seg_len = max(seg_len_list)/1000
+    total_states = len(set(set_states))
     pretty_table.add_row([dname,
                           f'{min_length}~{max_length}',
                           num_channels,
                           f'{min_num_states}~{max_num_states}',
                           f'{min_num_segs}~{max_num_segs}',
-                          f'{min_seg_len}~{max_seg_len}'])
+                          f'{min_seg_len}~{max_seg_len}',
+                          total_states])
 print(pretty_table)

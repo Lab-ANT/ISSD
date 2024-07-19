@@ -1,3 +1,5 @@
+import sys
+sys.path.append('.')
 from issd import ISSD
 from miniutils import *
 import time

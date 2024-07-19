@@ -61,9 +61,9 @@ for metric in ['ari', 'nmi', 'purity']:
         execution_list.append(table)
     table = np.mean(np.array(execution_list), axis=0)
     # drop 3,4 columns
-    # table = np.delete(table, [1, 2], axis=1)
+    table = np.delete(table, [1, 2], axis=1)
     # drop 3,4 in method_name_list
-    # method_name_list = np.delete(method_name_list, [1, 2]).tolist()
+    method_name_list = np.delete(method_name_list, [1, 2]).tolist()
 
     print(table.shape)
     pretty_table = pt.PrettyTable()

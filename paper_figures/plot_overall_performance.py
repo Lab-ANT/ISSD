@@ -73,7 +73,7 @@ for metric in ['ari', 'purity', 'nmi']:
         # rotate the x-axis label
         ax[i].tick_params(axis='x', rotation=45)
         # set x-axis label font size
-        ax[i].tick_params(axis='x', labelsize=9)
+        ax[i].tick_params(axis='x', labelsize=12)
         ax[i].grid(axis='y', lw=2, linestyle='--', color='gray')
         # put grid behind the bars
         # ax[i].set_axisbelow(True)
