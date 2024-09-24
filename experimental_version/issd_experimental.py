@@ -34,7 +34,6 @@ class ISSD:
     def compute_matrices(self, datalist, state_seq_list):
         self.datalist = datalist
         self.state_seq_list = state_seq_list
-        rep_model = TS2Vec(1, 320, batch_size=4, max_train_length=1000, device='cuda:0')
         self.matrices = []
         self.true_matrices = []
         self.corr_matrices = []
@@ -44,7 +43,8 @@ class ISSD:
             # add a dimension to the last axis to make it 3D
             data_blc = np.expand_dims(data, axis=-1)
             # print(data.shape)
-            rep_model.fit(data_blc, n_iters=100)
+            rep_model = TS2Vec(1, 320, batch_size=4, max_train_length=1000, device='cuda:0')
+            rep_model.fit(data_blc, n_iters=10)
             print('done')
             # cps = find_cut_points_from_state_seq(state_seq)
             _, cps = calculate_true_matrix_cf(state_seq)
@@ -70,6 +70,23 @@ class ISSD:
         self.corr_matrices = np.array(self.corr_matrices).mean(axis=0)
         self.clusters = cluster_corr(self.corr_matrices, threshold=self.clustering_threshold)
     
+    def get_completeness_quality(self):
+        """
+        For analysis purpose, will not be used in the selection process.
+        """
+        # check if self.matrices exists
+        if not hasattr(self, 'matrices'):
+            raise ValueError('Please compute matrices by calling compute_matrices() first.')
+        c_list = []
+        q_list = []
+        for mat, true_mat in zip(self.matrices, self.true_matrices):
+            completeness = cal_completeness_experimental(mat, true_mat) # completeness is a np.array
+            quality = cal_quality(mat, true_mat) # quality is a np.array
+            c_list.append(completeness)
+            q_list.append(quality)
+        self.completeness = np.array(c_list)
+        self.quality = np.array(q_list)
+
     def get_qf_solution(self, K):
         # QF strategy
         if len(self.matrices) == 1:
@@ -223,7 +240,7 @@ def compute_matrices(embs, state_seq, indicators):
                     continue
                 else:
                     # calculate the distance between two embs
-                    distance = np.linalg.norm(embs[i,j]-embs[i,k])
+                    distance = np.linalg.norm(embs[i,j]-embs[i,k], ord=2)
                     matrix[j,k] = distance
                     matrix[k,j] = distance
 
