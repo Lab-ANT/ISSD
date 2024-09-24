@@ -309,16 +309,34 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         #     masked_idx[idx_for_removal] = True
         # return selected_channels
 
+def cal_completeness_experimental(matrices, true_matrix):
+    idx_inner = np.argwhere(true_matrix==True)
+    idx_inter = np.argwhere(true_matrix==False)
+    theoretical_highest = idx_inter.shape[0]
+    num_channels = matrices.shape[0]
+    completeness = []
+    indicator_matrices = np.zeros_like(matrices).astype(bool)
+    for i in range(num_channels):
+        inner_tau = np.max(matrices[i, idx_inner].flatten())
+        c = np.sum(matrices[i]>inner_tau)
+        completeness.append(c)
+        indicator_matrices[i, matrices[i]>inner_tau] = True
+    return np.array(completeness)/theoretical_highest
+
 def cal_quality(matrices, true_matrix):
     idx_inner = np.argwhere(true_matrix==True)
     idx_inter = np.argwhere(true_matrix==False)
     num_channels = matrices.shape[0]
     quality = []
     for i in range(num_channels):
-        inner_tau = np.max(matrices[i, idx_inner].flatten())
-        inter_tau = np.min(matrices[i, idx_inter].flatten())
-        q = inter_tau - inner_tau
+        inner_mean = np.mean(matrices[i, idx_inner].flatten())
+        inter_mean = np.mean(matrices[i, idx_inter].flatten())
+        q = inter_mean - inner_mean
         quality.append(q)
+        # inner_tau = np.max(matrices[i, idx_inner].flatten())
+        # inter_tau = np.min(matrices[i, idx_inter].flatten())
+        # q = inter_tau - inner_tau
+        # quality.append(q)
     return np.array(quality)
 
 def cal_completeness(matrices, true_matrix):

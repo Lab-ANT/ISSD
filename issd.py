@@ -161,15 +161,22 @@ class ISSD:
         self.get_cf_solution(K)
         self.inte_solution()
 
-    def get_completeness(self):
+    def get_completeness_quality(self):
+        """
+        For analysis purpose, will not be used in the selection process.
+        """
         # check if self.matrices exists
         if not hasattr(self, 'matrices'):
             raise ValueError('Please compute matrices by calling compute_matrices() first.')
+        c_list = []
+        q_list = []
         for mat, true_mat in zip(self.matrices, self.true_matrices):
-            # print(np.sum(mat), np.sum(true_mat))
-            print(mat.shape, true_mat.shape)
-            completeness_list,_ = cal_completeness(mat, true_mat)
-            print(completeness_list)
+            completeness = cal_completeness_experimental(mat, true_mat) # completeness is a np.array
+            quality = cal_quality(mat, true_mat) # quality is a np.array
+            c_list.append(completeness)
+            q_list.append(quality)
+        self.completeness = np.array(c_list)
+        self.quality = np.array(q_list)
 
     def inte_solution(self):
         score_qf = 0
