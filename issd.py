@@ -159,7 +159,17 @@ class ISSD:
         self.compute_matrices(datalist, state_seq_list)
         self.get_qf_solution(K)
         self.get_cf_solution(K)
-        self.inte_qf_cf()
+        self.inte_solution()
+
+    def get_completeness(self):
+        # check if self.matrices exists
+        if not hasattr(self, 'matrices'):
+            raise ValueError('Please compute matrices by calling compute_matrices() first.')
+        for mat, true_mat in zip(self.matrices, self.true_matrices):
+            # print(np.sum(mat), np.sum(true_mat))
+            print(mat.shape, true_mat.shape)
+            completeness_list,_ = cal_completeness(mat, true_mat)
+            print(completeness_list)
 
     def inte_solution(self):
         score_qf = 0

@@ -309,9 +309,23 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         #     masked_idx[idx_for_removal] = True
         # return selected_channels
 
-def cal_completeness(matrices, true_matrices):
-    idx_inner = np.argwhere(true_matrices==True)
-    idx_inter = np.argwhere(true_matrices==False)
+def cal_quality(matrices, true_matrix):
+    idx_inner = np.argwhere(true_matrix==True)
+    idx_inter = np.argwhere(true_matrix==False)
+    num_channels = matrices.shape[0]
+    quality = []
+    for i in range(num_channels):
+        inner_tau = np.max(matrices[i, idx_inner].flatten())
+        inter_tau = np.min(matrices[i, idx_inter].flatten())
+        q = inter_tau - inner_tau
+        quality.append(q)
+    return np.array(quality)
+
+def cal_completeness(matrices, true_matrix):
+    idx_inner = np.argwhere(true_matrix==True)
+    # do not need to calculate the inter idx
+    # because non of the inner elem will be larger than inner tau
+    # idx_inter = np.argwhere(true_matrix==False)
     num_channels = matrices.shape[0]
     completeness = []
     indicator_matrices = np.zeros_like(matrices).astype(bool)
