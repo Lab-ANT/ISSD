@@ -6,6 +6,7 @@ import time
 import os
 import json
 
+
 data_json = {
     'QF Searching': [],
     'CF Searching': [],

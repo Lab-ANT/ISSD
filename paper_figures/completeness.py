@@ -22,7 +22,8 @@ for pc in parts['bodies']:
     pc.set_alpha(1)
 
 box = ax.boxplot(table, widths=0.25, patch_artist=True, whis=[0,100],)
-plt.savefig('completeness_analysis/fig_completeness_box.png')
+# plt.savefig('completeness_analysis/fig_completeness_box.png')
+plt.savefig('completeness_analysis/fig_completeness_box.pdf')
 plt.close()
 
 plt.style.use('classic')
@@ -38,7 +39,8 @@ for pc in parts['bodies']:
     pc.set_edgecolor('skyblue')
     pc.set_alpha(1)
 box = ax.boxplot(table, widths=0.25, patch_artist=True)
-plt.savefig('completeness_analysis/fig_quality_box.png')
+# plt.savefig('completeness_analysis/fig_quality_box.png')
+plt.savefig('completeness_analysis/fig_quality_box.pdf')
 plt.close()
 
 
