@@ -21,7 +21,7 @@ for d in datasets:
         state_seq_list.append(state_seq)
     selector = ISSD()
     selector.compute_matrices(datalist, state_seq_list)
-    selector.get_completeness_quality()
+    selector.compute_completeness_quality()
     # print(selector.completeness.shape)
     # print(selector.quality.shape)
     np.save(f'completeness_analysis/{d}_completeness.npy', selector.completeness)

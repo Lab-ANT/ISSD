@@ -309,6 +309,16 @@ def inte_issd(dataset, K, fname_list, strategy, clustering_threshold=0.2):
         #     masked_idx[idx_for_removal] = True
         # return selected_channels
 
+def convert_to_indicator_matrix(matrices):
+    """
+    Convert a list of matrices to an indicator matrix.
+    """
+    num_channels = matrices.shape[0]
+    indicator_matrix = np.zeros_like(matrices[0]).astype(bool)
+    for i in range(num_channels):
+        indicator_matrix = np.logical_or(indicator_matrix, matrices[i])
+    return indicator_matrix
+
 def cal_completeness_experimental(matrices, true_matrix):
     idx_inner = np.argwhere(true_matrix==True)
     idx_inter = np.argwhere(true_matrix==False)

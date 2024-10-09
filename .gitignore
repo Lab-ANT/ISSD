@@ -15,5 +15,5 @@ data-backup/
 unused/
 archive/
 temp/
-.json
+*.json
 completeness_analysis/

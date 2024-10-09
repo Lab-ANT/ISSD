@@ -161,7 +161,7 @@ class ISSD:
         self.get_cf_solution(K)
         self.inte_solution()
 
-    def get_completeness_quality(self):
+    def compute_completeness_quality(self):
         """
         For analysis purpose, will not be used in the selection process.
         """
@@ -177,6 +177,7 @@ class ISSD:
             q_list.append(quality)
         self.completeness = np.array(c_list)
         self.quality = np.array(q_list)
+        # max_c = matrix_OR(self.)
 
     def inte_solution(self):
         score_qf = 0
