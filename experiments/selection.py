@@ -11,6 +11,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from miniutils import *
+from issd import ISSD
 import time
 # ISSD
 from issd import issd
@@ -127,6 +128,39 @@ if method == 'issd':
             np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
             np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
             np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
+
+# if method == 'issd':
+#     # devide the dataset into two parts
+#     part1_list = fname_list[:len(fname_list)//2]
+#     part2_list = fname_list[len(fname_list)//2:]
+    
+#     for i in range(2):
+#         # rotate the dataset
+#         if i == 0:
+#             fname_list_train = part1_list
+#             fname_list_test = part2_list
+#         else:
+#             fname_list_train = part2_list
+#             fname_list_test = part1_list
+
+#         selector = ISSD()
+#         datalist = [load_data(os.path.join(raw_data_path, fname))[0] for fname in fname_list_train]
+#         state_seq_list = [load_data(os.path.join(raw_data_path, fname))[1] for fname in fname_list_train]
+
+#         selector.compute_matrices(datalist, state_seq_list)
+#         selected_channels_qf = selector.get_qf_solution(4)
+#         selected_channels_cf = selector.get_cf_solution(4)
+#         selected_channels = selector.inte_solution()
+
+#         print(f'qf: {selected_channels_qf}')
+#         print(f'cf: {selected_channels_cf}')
+#         print(f'integrated: {selected_channels}')
+        
+#         for fname in fname_list_test:
+#             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
+#             np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
+#             np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
+#             np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
 
 elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
     # devide the dataset into two parts

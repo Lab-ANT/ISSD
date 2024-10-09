@@ -203,6 +203,7 @@ class ISSD:
             self.solution = self.qf_solution
         else:
             self.solution = self.cf_solution
+        return self.solution
         
 def issd(datalist, state_seq_list, K,
          clustering_threshold=0.2,
