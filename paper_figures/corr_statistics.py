@@ -28,12 +28,13 @@ for dataset in datasets:
         # print(corr_matrix)
         corr_matrix_list.append(corr_matrix.flatten())
     avg_corr_matrix = np.mean(corr_matrix_list, axis=0)
+    print(avg_corr_matrix.shape)
     dataset_corr_list.append(avg_corr_matrix)
 
 import matplotlib.pyplot as plt
 
 plt.style.use('classic')
-fig, ax = plt.subplots(figsize=(4, 4))
+fig, ax = plt.subplots(figsize=(4, 3))
 parts = ax.violinplot(dataset_corr_list, showmeans=False, showmedians=True, showextrema=False)
 # violin setting
 for pc in parts['bodies']:
@@ -56,7 +57,7 @@ for median in box['medians']:
 
 # plt.xticks(range(1, len(datasets)+1), datasets, rotation=45)
 # plt.xticks(range(1, len(datasets)+1), datasets, fontsize=9, fontweight='bold')
-plt.xticks(range(1, len(datasets)+1), datasets, fontsize=9)
+plt.xticks(range(1, len(datasets)+1), datasets, fontsize=12, rotation=15)
 plt.tight_layout()
 plt.savefig('output/dataset_analysis/figs/corr_boxplot.png')
 plt.savefig('output/dataset_analysis/figs/corr_boxplot.pdf')

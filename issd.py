@@ -14,14 +14,14 @@ import itertools
 
 class ISSD:
     def __init__(self,
-        clustering_threshold=0.2,
+        clustering_threshold=0.8,
         num_samples=30,
         min_seg_len_to_exclude=100,
         test_method='nn',
         inte_strategy='lda',
         n_jobs=10) -> None:
 
-        self.clustering_threshold = clustering_threshold
+        self.clustering_threshold = 1-clustering_threshold
         self.num_samples = num_samples
         self.min_seg_len_to_exclude = min_seg_len_to_exclude
         self.test_method = test_method
