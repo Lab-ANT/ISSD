@@ -1,16 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# data = np.load('effect_of_core_num.npy')/20
-# data2 = np.load('effect_of_core_num2.npy')
-# data = np.concatenate([data, data2], axis=0)
-data = np.load('effect_of_core_num.npy')[:20]
+time_list = [np.load(f'output/time_consumption/data/execution{i}.npy') for i in range(5)]
+data = np.mean(time_list, axis=0)
 
 # calculate acceleration
 acceleration = data[0] / data
 
 # calculate efficiency
 efficiency = acceleration / np.arange(1, 21)
+
+print(efficiency)
 
 x = np.arange(1, 21)
 
@@ -37,5 +37,5 @@ legend = ax.legend(lines, labels, loc='upper left', frameon=True)
 
 plt.xlim([1, 20])
 plt.tight_layout()
-plt.savefig('effect_of_core_num.png')
-plt.savefig('effect_of_core_num.pdf')
+plt.savefig('output/figs/effect_of_core_num.png')
+plt.savefig('output/figs/effect_of_core_num.pdf')
