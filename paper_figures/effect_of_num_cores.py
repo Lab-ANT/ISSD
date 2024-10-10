@@ -28,12 +28,13 @@ ax.set_ylabel('Computation Time (s)', fontsize=16)
 ax2 = ax.twinx()
 line2, = ax2.plot(x, acceleration, marker='s', lw=2, color='red', label='Speedup')
 line3, = ax2.plot(x, efficiency, marker='^', lw=2, color='green', label='Efficiency')
+ax2.set_ylim([0, 11])
 ax2.set_ylabel('Speedup & Efficiency', fontsize=16)
 
 # Create a legend box
 lines = [line1, line2, line3]
 labels = [line.get_label() for line in lines]
-legend = ax.legend(lines, labels, loc='upper left', frameon=True)
+legend = ax.legend(lines, labels, loc='upper center', frameon=True, fontsize=13)
 
 plt.xlim([1, 20])
 plt.tight_layout()
