@@ -184,7 +184,7 @@ class ISSD:
         score_cf = 0
         for data, state_seq in zip(self.datalist, self.state_seq_list):
             reduced_data_issd_qf = data[:,self.qf_solution]
-            reduced_data_issd_cf = data[:,self.qf_solution]
+            reduced_data_issd_cf = data[:,self.cf_solution]
             if self.inte_strategy == 'lda':
                 lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
                 score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))

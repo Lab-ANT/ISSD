@@ -15,7 +15,7 @@ from miniutils import *
 # from issd_old import issd
 import time
 # ISSD
-from issd import issd
+# from issd import issd
 from sklearn.feature_selection import mutual_info_regression
 from sklearn.decomposition import PCA
 # ECS/ECP
