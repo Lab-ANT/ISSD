@@ -14,7 +14,7 @@ from miniutils import *
 from issd import ISSD
 import time
 # ISSD
-from issd import issd
+from issdv2 import issd
 from sklearn.feature_selection import mutual_info_regression
 from sklearn.decomposition import PCA
 # ECS/ECP
@@ -47,7 +47,7 @@ raw_data_path = f'data/{dataset}/raw'
 data_output_path = f'data/{dataset}/{method}' # path to save the selected data
 os.makedirs(data_output_path, exist_ok=True)
 
-if method not in ['issd', 'mi', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
+if method not in ['issd', 'issdv2', 'mi', 'ecs', 'ecp', 'lda', 'sfm', 'pca', 'umap']:
     raise ValueError(f'Unsupported method: {method}')
 
 fname_list = os.listdir(raw_data_path)
@@ -63,7 +63,7 @@ def mutual_info_selector(data, state_seq, n_components):
     idx_sorted = np.argsort(score_list)[::-1]
     return list(idx_sorted[:n_components])
 
-if method == 'issd':
+if method == 'issdv2':
     # precompute statistics for all time series
     for fname in tqdm.tqdm(fname_list):
         data, label = load_data(os.path.join(raw_data_path, fname))
@@ -71,7 +71,7 @@ if method == 'issd':
         result = issd(data,
                     label,
                     n_components,
-                    strategy='cf', # cf strategy
+                    strategy='cf',
                     save_path=f'output/issd-cf/{dataset}/{fname[:-4]}')
 
     # devide the dataset into two parts
@@ -89,9 +89,6 @@ if method == 'issd':
 
         selected_channels_qf = inte_issd(dataset, n_components, fname_list_train, 'qf')
         selected_channels_cf = inte_issd(dataset, n_components, fname_list_train, 'cf')
-
-        print(f'qf: {selected_channels_qf}')
-        print(f'cf: {selected_channels_cf}')
 
         score_qf = 0
         score_cf = 0
@@ -118,49 +115,51 @@ if method == 'issd':
             selected_channels = selected_channels_qf
         else:
             selected_channels = selected_channels_cf
-        print(f'selected channels: {selected_channels}')
+        print(f'qf: {selected_channels_qf}')
+        print(f'cf: {selected_channels_cf}')
+        print(f'integrated: {selected_channels}')
         
         os.makedirs(data_output_path+'-qf', exist_ok=True)
         os.makedirs(data_output_path+'-cf', exist_ok=True)
         for fname in fname_list_test:
-            print('issd', s_qf, s_cf, fname)
+            # print('issd', s_qf, s_cf, fname)
             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
             np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
             np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
             np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
 
-# if method == 'issd':
-#     # devide the dataset into two parts
-#     part1_list = fname_list[:len(fname_list)//2]
-#     part2_list = fname_list[len(fname_list)//2:]
+if method == 'issd':
+    # devide the dataset into two parts
+    part1_list = fname_list[:len(fname_list)//2]
+    part2_list = fname_list[len(fname_list)//2:]
     
-#     for i in range(2):
-#         # rotate the dataset
-#         if i == 0:
-#             fname_list_train = part1_list
-#             fname_list_test = part2_list
-#         else:
-#             fname_list_train = part2_list
-#             fname_list_test = part1_list
+    for i in range(2):
+        # rotate the dataset
+        if i == 0:
+            fname_list_train = part1_list
+            fname_list_test = part2_list
+        else:
+            fname_list_train = part2_list
+            fname_list_test = part1_list
 
-#         selector = ISSD()
-#         datalist = [load_data(os.path.join(raw_data_path, fname))[0] for fname in fname_list_train]
-#         state_seq_list = [load_data(os.path.join(raw_data_path, fname))[1] for fname in fname_list_train]
+        selector = ISSD()
+        datalist = [load_data(os.path.join(raw_data_path, fname))[0] for fname in fname_list_train]
+        state_seq_list = [load_data(os.path.join(raw_data_path, fname))[1] for fname in fname_list_train]
 
-#         selector.compute_matrices(datalist, state_seq_list)
-#         selected_channels_qf = selector.get_qf_solution(4)
-#         selected_channels_cf = selector.get_cf_solution(4)
-#         selected_channels = selector.inte_solution()
+        selector.compute_matrices(datalist, state_seq_list)
+        selected_channels_qf = selector.get_qf_solution(4)
+        selected_channels_cf = selector.get_cf_solution(4)
+        selected_channels = selector.inte_solution()
 
-#         print(f'qf: {selected_channels_qf}')
-#         print(f'cf: {selected_channels_cf}')
-#         print(f'integrated: {selected_channels}')
+        print(f'qf: {selected_channels_qf}')
+        print(f'cf: {selected_channels_cf}')
+        print(f'integrated: {selected_channels}')
         
-#         for fname in fname_list_test:
-#             data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
-#             np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
-#             np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
-#             np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
+        for fname in fname_list_test:
+            data = np.load(f'data/{dataset}/raw/{fname}', allow_pickle=True)
+            np.save(f'data/{dataset}/issd/{fname}', data[:,selected_channels+[-1]])
+            np.save(f'data/{dataset}/issd-qf/{fname}', data[:,selected_channels_qf+[-1]])
+            np.save(f'data/{dataset}/issd-cf/{fname}', data[:,selected_channels_cf+[-1]])
 
 elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
     # devide the dataset into two parts
