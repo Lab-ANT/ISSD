@@ -52,7 +52,7 @@ def read_summary(path):
 
 for metric in ['ari', 'nmi', 'purity']:
     execution_list = []
-    for execution in range(4, 8):
+    for execution in range(4, 9):
         table, method_name_list, dmethod_name_list, dataset_name_list = read_summary(f'archive/execution{execution}/summary_{metric}.txt')
         print(table)
         print(method_name_list)
@@ -81,48 +81,3 @@ for metric in ['ari', 'nmi', 'purity']:
     os.makedirs('output', exist_ok=True)
     with open(f'output/summary_{metric}.txt', 'w') as f:
         f.write(str(pretty_table))
-
-    # num_datasets = len(dataset_name_list)
-    # num_dmethods = len(dmethod_name_list)
-    # # partition the table by downstream methods
-    # avg_score_on_datasets = []
-    # for i in range(num_datasets):
-    #     dataset_idx = [j*num_datasets+i for j in range(num_dmethods)]
-    #     dataset_rows = table[dataset_idx]
-    #     avg_score_on_datasets.append(np.mean(dataset_rows, axis=0))
-    # avg_score_on_datasets = np.array(avg_score_on_datasets)
-
-    # plt.style.use('classic')
-    # fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(3*num_datasets, 3))
-    # for i, avg_scores in enumerate(avg_score_on_datasets):
-    #     ax[i].bar(method_name_list,
-    #                 avg_scores,
-    #                 width=0.5,
-    #                 color=['#c9393e', '#497fc0', '#29517c', '#9694e7', '#ecd268', '#9dc37d', '#ddd2a4'])
-    #     # rotate the x-axis label
-    #     ax[i].tick_params(axis='x', rotation=45)
-    #     ax[i].grid(axis='y', lw=2, linestyle='--', color='gray')
-    #     # put grid behind the bars
-    #     # ax[i].set_axisbelow(True)
-    #     ax[i].set_title(f'{dataset_name_list[i]}', fontsize=17)
-    #     ax[i].set_ylim(0, 1.1)
-    #     if metric == 'ari':
-    #         ax[i].set_ylabel('ARI', fontsize=17)
-    #     elif metric == 'purity':
-    #         ax[i].set_ylabel('Purity', fontsize=17)
-    #     elif metric == 'nmi':
-    #         ax[i].set_ylabel('NMI', fontsize=17)
-    #     ax[i].yaxis.labelpad = -1
-    #     # add starts to the best and second best
-    #     sort_idx = np.argsort(avg_scores)[::-1]
-    #     max_val = avg_scores[sort_idx[0]]
-    #     max_idx = sort_idx[0]
-    #     second_max_val = avg_scores[sort_idx[1]]
-    #     second_max_idx = sort_idx[1]
-    #     # if max_val*1.1 > 100:
-    #     #     ax[i].set_ylim(0, max_val*1.2)
-    #     ax[i].scatter(max_idx, max_val+0.08, color='red', s=120, marker='*')
-    #     ax[i].scatter(second_max_idx, second_max_val+0.08, color='#5D8AA8', s=120, marker='*')
-    # plt.tight_layout()
-    # plt.savefig(f'overall_performance_{metric}.png', bbox_inches='tight')
-    # plt.savefig(f'output/figs/overall_performance_{metric}.pdf', bbox_inches='tight')

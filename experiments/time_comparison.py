@@ -55,61 +55,22 @@ fname_list = os.listdir(raw_data_path)
 fname_list.sort()
 selected_channels = []
 
-if method == 'issd':
-    time_start = time.time()
-    # precompute statistics for all time series
-    for fname in tqdm.tqdm(fname_list):
-        data, label = load_data(os.path.join(raw_data_path, fname))
-        num_channels = data.shape[1]
-        result = issd(data,
-                    label,
-                    n_components,
-                    strategy='qf',
-                    save_path=f'output/issd-cf/{dataset}/{fname[:-4]}')
-
-    # devide the dataset into two parts
-    part1_list = fname_list[:len(fname_list)//2]
-    part2_list = fname_list[len(fname_list)//2:]
-    
-    for i in range(2):
-        # rotate the dataset
-        if i == 0:
-            fname_list_train = part1_list
-            fname_list_test = part2_list
-        else:
-            fname_list_train = part2_list
-            fname_list_test = part1_list
-
-        selected_channels_qf = inte_issd(dataset, n_components, fname_list_train, 'qf')
-        selected_channels_cf = inte_issd(dataset, n_components, fname_list_train, 'cf')
-
-        score_qf = 0
-        score_cf = 0
-        for fname in fname_list_train:
-            data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
-            reduced_data_issd_qf = data[:,selected_channels_qf]
-            lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
-            score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
- 
-            data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
-            reduced_data_issd_cf = data[:,selected_channels_cf]
-            lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
-            score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
-
-        s_qf = score_qf
-        s_cf = score_cf
-        if s_qf >= s_cf:
-            selected_channels = selected_channels_qf
-        else:
-            selected_channels = selected_channels_cf
-    time_end = time.time()
-
 # if method == 'issd':
+#     time_start = time.time()
+#     # precompute statistics for all time series
+#     for fname in tqdm.tqdm(fname_list):
+#         data, label = load_data(os.path.join(raw_data_path, fname))
+#         num_channels = data.shape[1]
+#         result = issd(data,
+#                     label,
+#                     n_components,
+#                     strategy='qf',
+#                     save_path=f'output/issd-cf/{dataset}/{fname[:-4]}')
+
 #     # devide the dataset into two parts
 #     part1_list = fname_list[:len(fname_list)//2]
 #     part2_list = fname_list[len(fname_list)//2:]
     
-#     time_start = time.time()
 #     for i in range(2):
 #         # rotate the dataset
 #         if i == 0:
@@ -119,15 +80,54 @@ if method == 'issd':
 #             fname_list_train = part2_list
 #             fname_list_test = part1_list
 
-#         selector = ISSD(n_jobs=20)
-#         datalist = [load_data(os.path.join(raw_data_path, fname))[0] for fname in fname_list_train]
-#         state_seq_list = [load_data(os.path.join(raw_data_path, fname))[1] for fname in fname_list_train]
+#         selected_channels_qf = inte_issd(dataset, n_components, fname_list_train, 'qf')
+#         selected_channels_cf = inte_issd(dataset, n_components, fname_list_train, 'cf')
 
-#         selector.compute_matrices(datalist, state_seq_list)
-#         selected_channels_qf = selector.get_qf_solution(4)
-#         selected_channels_cf = selector.get_cf_solution(4)
-#         selected_channels = selector.inte_solution()
+#         score_qf = 0
+#         score_cf = 0
+#         for fname in fname_list_train:
+#             data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
+#             reduced_data_issd_qf = data[:,selected_channels_qf]
+#             lda_issd_qf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_qf, state_seq)
+#             score_qf += np.sum(mutual_info_regression(lda_issd_qf, state_seq))
+ 
+#             data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
+#             reduced_data_issd_cf = data[:,selected_channels_cf]
+#             lda_issd_cf = LinearDiscriminantAnalysis(n_components=1).fit_transform(reduced_data_issd_cf, state_seq)
+#             score_cf += np.sum(mutual_info_regression(lda_issd_cf, state_seq))
+
+#         s_qf = score_qf
+#         s_cf = score_cf
+#         if s_qf >= s_cf:
+#             selected_channels = selected_channels_qf
+#         else:
+#             selected_channels = selected_channels_cf
 #     time_end = time.time()
+
+if method == 'issd':
+    # devide the dataset into two parts
+    part1_list = fname_list[:len(fname_list)//2]
+    part2_list = fname_list[len(fname_list)//2:]
+    
+    time_start = time.time()
+    for i in range(2):
+        # rotate the dataset
+        if i == 0:
+            fname_list_train = part1_list
+            fname_list_test = part2_list
+        else:
+            fname_list_train = part2_list
+            fname_list_test = part1_list
+
+        selector = ISSD(n_jobs=20)
+        datalist = [load_data(os.path.join(raw_data_path, fname))[0] for fname in fname_list_train]
+        state_seq_list = [load_data(os.path.join(raw_data_path, fname))[1] for fname in fname_list_train]
+
+        selector.compute_matrices(datalist, state_seq_list)
+        selected_channels_qf = selector.get_qf_solution(4)
+        selected_channels_cf = selector.get_cf_solution(4)
+        selected_channels = selector.inte_solution()
+    time_end = time.time()
 
 elif method in ['lda', 'ecp', 'ecs', 'sfm', 'mi']:
     # devide the dataset into two parts
