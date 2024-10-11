@@ -36,10 +36,12 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('dname', type=str, help='dataset name')
 argparser.add_argument('method', type=str, help='selection method')
 argparser.add_argument('n_components', type=int, help='number of components')
+argparser.add_argument('corr_threshold', type=float, help='correration threshold', default=0.8)
 args = argparser.parse_args()
 dataset = args.dname
 method = args.method
 n_components = args.n_components
+corr_threshold = args.corr_threshold
 
 print(f'Processing {dataset} using {method}')
 
@@ -142,7 +144,7 @@ if method == 'issd':
             fname_list_train = part2_list
             fname_list_test = part1_list
 
-        selector = ISSD()
+        selector = ISSD(corr_threshold=corr_threshold)
         datalist = [load_data(os.path.join(raw_data_path, fname))[0] for fname in fname_list_train]
         state_seq_list = [load_data(os.path.join(raw_data_path, fname))[1] for fname in fname_list_train]
 
