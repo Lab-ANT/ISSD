@@ -37,7 +37,7 @@ for dataset in ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']:
     end_cf = time.time()
     start_inte = time.time()
     for i in range(5):
-        selected_channels_cf = selector.inte_solution(4)
+        selected_channels_cf = selector.inte_solution()
     end_inte = time.time()
     print(f'time taken for {dataset}: {end_inte-start_nn} seconds')
     data_json['QF Searching'].append((end_qf-start_qf)/5)
