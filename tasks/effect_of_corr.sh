@@ -53,7 +53,7 @@ for corr in 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9; do
     # run autoplait
     for dataset in ${dataset_list[@]}; do
         mkdir -p archive/corr_effect/$dataset/$corr/autoplait
-        # python experiments/run_dmethods.py ticc $dataset issd
+        bash downstream_methods/AutoPlait/experiments/run_AutoPlait_parallel.sh $dataset issd
         cp -r output/results/autoplait/$dataset/issd/ archive/corr_effect/$dataset/$corr/autoplait
     done
 done
