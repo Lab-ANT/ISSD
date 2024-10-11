@@ -11,6 +11,7 @@ output/
 execution*/
 output-backup/
 output-backup2/
+archived_output/
 data-backup/
 unused/
 archive/

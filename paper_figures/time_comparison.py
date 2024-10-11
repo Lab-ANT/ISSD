@@ -7,6 +7,7 @@ result_json_list = [json.load(open(f'output/time_consumption/data/comparison_exe
 
 methods = ['issd', 'pca', 'lda', 'umap', 'sfm', 'ecp', 'ecs']
 datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'SynSeg', 'USC-HAD']
+species = ['ISSD', 'PCA', 'LDA', 'UMAP', 'SFM', 'ECP', 'ECS']
 
 avg_table = []
 for result_json in result_json_list:
@@ -41,17 +42,17 @@ num_rows = avg_table.shape[0]
 
 for i in range(num_rows):
     print(avg_table[i,:].shape)
-    ax.bar(x+offset, avg_table[i,:], width, label=methods[i], color=colors[i])
+    ax.bar(x+offset, avg_table[i,:], width, label=species[i], color=colors[i])
     offset += width
 
 ax.set_xticks(x)
 ax.set_xticklabels(datasets, size=14)
 ax.set_yscale('log')
-ax.set_xlim(0.3, 5.5)
+ax.set_xlim(0.5, 5.5)
 ax.set_ylim(1e-4, 1e3)
 ax.set_xlabel('Datasets', fontsize=16)
 ax.set_ylabel('Computation Time (s)', fontsize=16)
-ax.set_title('Computation Time on Datasets', fontsize=16)
+# ax.set_title('Computation Time on Datasets', fontsize=16)
 # set ticks size larger
 ax.tick_params(axis='y', which='major', length=8, width=1, labelright=False)
 ax.tick_params(axis='y', which='minor', length=4, width=1, labelright=False)
@@ -60,7 +61,7 @@ ax.tick_params(axis='y', labelsize=14)
 ax.yaxis.set_tick_params(right=False)
 # hide right ticks
 ax.yaxis.set_ticks_position('left')
-plt.legend(fontsize=13, loc='upper center', ncol=7)
+plt.legend(fontsize=13, loc='upper center', ncol=7, bbox_to_anchor=(0.5, 1.2))
 plt.tight_layout()
 plt.savefig('output/figs/time_comparison.png')
 plt.savefig('output/figs/time_comparison.pdf')
