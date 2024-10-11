@@ -1,46 +1,44 @@
-import sys
-sys.path.append('.')
-from issd import ISSD
-from miniutils import *
-import time
-import os
+import numpy as np
+import matplotlib.pyplot as plt
 import json
 
+data_json = json.load(open('archived_output/time_consumption/data/time_consumed.json', 'r'))
 
-data_json = {
-    'QF Searching': [],
-    'CF Searching': [],
-    'nntest': [],
-    'Integration': [],
-}
+plt.style.use('classic')
+fig, ax = plt.subplots(figsize=(5,5))
 
-for dataset in ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']:
-    fname_list = os.listdir(f'data/{dataset}/raw')
-    datalist = []
-    state_seq_list = []
-    for fname in fname_list:
-        data, state_seq = load_data(f'data/{dataset}/raw/{fname}')
-        datalist.append(data)
-        state_seq_list.append(state_seq)
-    
-    selector = ISSD()
-    start_nn = time.time()
-    selector.compute_matrices(datalist, state_seq_list)
-    end_nn = time.time()
-    start_qf = time.time()
-    selected_channels_qf = selector.get_qf_solution(4)
-    end_qf = time.time()
-    start_cf = time.time()
-    selected_channels_cf = selector.get_cf_solution(4)
-    end_cf = time.time()
-    start_inte = time.time()
-    selected_channels_cf = selector.inte_solution()
-    end_inte = time.time()
-    print(f'time taken for {dataset} iteration: {end_cf-start_nn} seconds')
-    data_json['QF Searching'].append(end_qf-start_qf)
-    data_json['CF Searching'].append(end_cf-start_cf)
-    data_json['nntest'].append(end_nn-start_nn)
-    data_json['Integration'].append(end_inte-start_inte)
+species = ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']
 
-with open('time_consumed.json', 'w') as f:
-    json.dump(data_json, f)
+width = 0.2
+# bottom = np.zeros(len(species))
+offset = -0.3
+x = np.array([1,2,3,4,5])
+colors = color=['#ecd268', '#c9393e', '#9694e7', '#497fc0']
+i = 0
+for boolean, weight_count in data_json.items():
+    # ax.bar(x+offset, weight_count, width, label=boolean, color=colors[i], edgecolor=colors[i])
+    ax.bar(x+offset, weight_count, width, label=boolean, color=colors[i])
+    offset += width
+    i+=1
+ax.set_xticks(x)
+ax.set_xticklabels(species, size=11.5)
+
+ax.set_yscale('log')
+
+ax.set_xlim(0.3, 5.5)
+ax.set_ylim(1e-4, 1e3)
+ax.set_xlabel('Datasets', fontsize=16)
+ax.set_ylabel('Computation Time (s)', fontsize=16)
+ax.set_title('Computation Time on Datasets', fontsize=16)
+# set ticks size larger
+ax.tick_params(axis='y', which='major', length=8, width=1, labelright=False)
+ax.tick_params(axis='y', which='minor', length=4, width=1, labelright=False)
+ax.tick_params(axis='y', labelsize=14)
+# hide right y-axis
+ax.yaxis.set_tick_params(right=False)
+# hide right ticks
+ax.yaxis.set_ticks_position('left')
+plt.legend(fontsize=13, loc='upper center', ncol=2)
+plt.tight_layout()
+plt.savefig('archived_output/figs/time_datasets.png')
+plt.savefig('archived_output/figs/time_datasets.pdf')

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-time_list = [np.load(f'output/time_consumption/data/execution{i}.npy') for i in range(5)]
+time_list = [np.load(f'archived_output/time_consumption/data/execution{i}.npy') for i in range(5)]
 data = np.mean(time_list, axis=0)
 
 # calculate acceleration
@@ -38,5 +38,5 @@ legend = ax.legend(lines, labels, loc='upper center', frameon=True, fontsize=13)
 
 plt.xlim([1, 20])
 plt.tight_layout()
-plt.savefig('output/figs/effect_of_core_num.png')
-plt.savefig('output/figs/effect_of_core_num.pdf')
+plt.savefig('archived_output/figs/effect_of_core_num.png')
+plt.savefig('archived_output/figs/effect_of_core_num.pdf')

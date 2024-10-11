@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import json
 import os
 
-result_json_list = [json.load(open(f'output/time_consumption/data/comparison_execution{i}.json', 'r')) for i in range(1)]
+result_json_list = [json.load(open(f'archived_output/time_consumption/data/comparison_execution{i}.json', 'r')) for i in range(5)]
 
 methods = ['issd', 'pca', 'lda', 'umap', 'sfm', 'ecp', 'ecs']
 datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'SynSeg', 'USC-HAD']
@@ -26,7 +26,7 @@ print(avg_table.shape)
 
 os.makedirs('output/figs', exist_ok=True)
 
-data_json = json.load(open('time_comparison.json', 'r'))
+# data_json = json.load(open('time_comparison.json', 'r'))
 
 plt.style.use('classic')
 fig, ax = plt.subplots(figsize=(10,4))
@@ -63,5 +63,5 @@ ax.yaxis.set_tick_params(right=False)
 ax.yaxis.set_ticks_position('left')
 plt.legend(fontsize=13, loc='upper center', ncol=7, bbox_to_anchor=(0.5, 1.2))
 plt.tight_layout()
-plt.savefig('output/figs/time_comparison.png')
-plt.savefig('output/figs/time_comparison.pdf')
+plt.savefig('archived_output/figs/time_comparison.png')
+plt.savefig('archived_output/figs/time_comparison.pdf')
