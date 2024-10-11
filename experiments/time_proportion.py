@@ -22,24 +22,28 @@ for dataset in ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']:
         datalist.append(data)
         state_seq_list.append(state_seq)
     
-    selector = ISSD()
+    selector = ISSD(n_jobs=20)
     start_nn = time.time()
-    selector.compute_matrices(datalist, state_seq_list)
+    for i in range(5):
+        selector.compute_matrices(datalist, state_seq_list)
     end_nn = time.time()
     start_qf = time.time()
-    selected_channels_qf = selector.get_qf_solution(4)
+    for i in range(5):
+        selected_channels_qf = selector.get_qf_solution(4)
     end_qf = time.time()
     start_cf = time.time()
-    selected_channels_cf = selector.get_cf_solution(4)
+    for i in range(5):
+        selected_channels_cf = selector.get_cf_solution(4)
     end_cf = time.time()
     start_inte = time.time()
-    selected_channels_cf = selector.inte_solution()
+    for i in range(5):
+        selected_channels_cf = selector.inte_solution(4)
     end_inte = time.time()
-    print(f'time taken for {dataset} iteration: {end_cf-start_nn} seconds')
-    data_json['QF Searching'].append(end_qf-start_qf)
-    data_json['CF Searching'].append(end_cf-start_cf)
-    data_json['nntest'].append(end_nn-start_nn)
-    data_json['Integration'].append(end_inte-start_inte)
+    print(f'time taken for {dataset}: {end_inte-start_nn} seconds')
+    data_json['QF Searching'].append((end_qf-start_qf)/5)
+    data_json['CF Searching'].append((end_cf-start_cf)/5)
+    data_json['nntest'].append((end_nn-start_nn)/5)
+    data_json['Integration'].append((end_inte-start_inte)/5)
 
 with open('time_consumed.json', 'w') as f:
     json.dump(data_json, f)
