@@ -12,6 +12,7 @@ import math
 from sklearn.neighbors import KDTree, BallTree
 import numpy as np
 from scipy.signal import find_peaks
+from sklearn.metrics import confusion_matrix
 
 def is_constant(signal, tolerance=1e-5):
     return np.all(np.abs(np.diff(signal)) < tolerance)
@@ -816,3 +817,8 @@ def nn_test(sample1, sample2, n, k, nnmethod='ball'):
             else:
                 continue
     return T_rp/(p*r)
+
+def purity_score(y_true, y_pred):
+    contingency_matrix = confusion_matrix(y_true, y_pred)
+    purity = np.sum(np.max(contingency_matrix, axis=0)) / np.sum(contingency_matrix)
+    return purity

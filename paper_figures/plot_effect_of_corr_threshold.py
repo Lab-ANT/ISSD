@@ -23,14 +23,17 @@ with open('corr.out') as f:
 datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'SynSeg', 'USC-HAD']
 
 plt.style.use('classic')
-plt.figure(figsize=(4,4))
+plt.figure(figsize=(4,3))
 x = np.arange(8)
+y_min = np.min(nmi)
+y_max = np.max(nmi)
 # print(x)
 for i in range(5):
     plt.plot(x, nmi[i], lw=2, marker='o', label=datasets[i], color=color[i+1])
 nmi = np.mean(nmi, axis=0)
 plt.plot(x, nmi, lw=2, marker='o', label='Average', color=color[0])
-plt.ylim(0.5, 0.8)
+plt.ylim(y_min*0.8, y_max*1.2)
+plt.yticks([0.5, 0.6, 0.7, 0.8])
 plt.ylabel('NMI')
 plt.xlabel('Pearson Correlation Threshold')
 plt.xticks(x, ['0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9'])
