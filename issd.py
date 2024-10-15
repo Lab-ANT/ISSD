@@ -108,6 +108,7 @@ class ISSD:
         masked_idx = np.array([False]*len(mean_inner))
 
         current_matrix = np.zeros(indicator_matrices.shape).astype(bool)
+        self.indicator_matrices = []
         while len(selected_channels_cf) < K:
             remaining_idx = np.argwhere(~masked_idx).flatten()
             costlist = np.array([cost(m, current_matrix) for m in indicator_matrices])
@@ -123,6 +124,9 @@ class ISSD:
             # mean_quality = np.sum(interval[selected_channels_cf])/len(selected_channels_cf)
             mean_quality = np.sum(interval[selected_channels_cf])
             print(idx, np.sum(current_matrix), mean_quality)
+            self.indicator_matrices.append(current_matrix)
+        # self.indicator_matrices = indicator_matrices
+
         self.cf_solution = selected_channels_cf
         return selected_channels_cf
     
@@ -374,6 +378,7 @@ def compute_matrices(indicators, state_seq,
         num_channels = indicators.shape[1]
         # calculate true matrix
         true_matrix, cut_points = calculate_true_matrix_cf(state_seq)
+        # true_matrix, cut_points = calculate_true_matrix(state_seq)
         min_seg_len = np.min(np.diff(cut_points))
         acf = find_k_by_acf(indicators,
                             min_seg_len if min_seg_len<500 else 500,
