@@ -13,10 +13,11 @@ os.makedirs('completeness_analysis', exist_ok=True)
 """
 Selection
 """
-fname = '86_08.npy'
+fname = 'data/MoCap/raw/86_08.npy'
+# fname = 'data/SynSeg/raw/synthetic2.npy'
 
 # Select on multiple time series
-data, state_seq = load_data(f'data/MoCap/raw/{fname}')
+data, state_seq = load_data(fname)
 selector = ISSD()
 selector.compute_matrices([data], [state_seq])
 # selector.compute_completeness_quality()
@@ -27,7 +28,7 @@ selected_channels = selector.cf_solution
 """
 Plot
 """
-data, state_seq = load_data(f'data/MoCap/raw/{fname}')
+data, state_seq = load_data(fname)
 state_seq = state_seq.reshape(-1, 1)
 # selected_channels = [58, 59, 48, 56]
 state_seq = reorder_label(state_seq)
@@ -37,11 +38,16 @@ length = data.shape[0]
 
 # plt.style.use('classic')
 results = []
+channel_set = []
 fig, ax = plt.subplots(nrows=4, figsize=(8, 4))
 for i, idx in enumerate(selected_channels):
     channel = data[:, idx]
     # scale to 0-1
     channel = (channel - channel.min()) / (channel.max() - channel.min())
+    channel_set.append(channel)
+    # # plot the former results in the same ax, gray
+    # for k in range(i):
+    #     ax[i].plot(channel_set[k], color='gray', alpha=0.9)
     ax[i].plot(channel)
     results.append(idx)
     # ax[i].set_xticks(f'Result set: {results}')
