@@ -40,7 +40,7 @@ for pc in parts['bodies']:
     pc.set_facecolor('skyblue')
     pc.set_edgecolor('skyblue')
     pc.set_alpha(1)
-box = ax.boxplot(table, widths=0.25, patch_artist=True)
+box = ax.boxplot(table, widths=0.25, patch_artist=True, whis=[0,95])
 ax.set_xticks(np.arange(1, len(datasets)+1))
 ax.set_xticklabels(datasets, rotation=15, fontsize=10)
 ax.set_ylabel('Quality')
