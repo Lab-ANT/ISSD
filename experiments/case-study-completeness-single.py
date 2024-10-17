@@ -14,10 +14,18 @@ fname = 'data/MoCap/raw/86_08.npy'
 data, state_seq = load_data(fname)
 state_seq = state_seq.reshape(-1, 1)
 selected_channels = [58, 28, 38, 55]
+c = [268, 278, 284, 284]
+gray_position = [
+    [2,3,4,7,8,9],
+    [0,4,6,7,10],
+    [0,4,7,10],
+    [3,4,6,7]
+]
 state_seq = reorder_label(state_seq)
 
-cps = find_cut_points_from_state_seq(state_seq)
+cps = find_cut_points_from_state_seq(state_seq)[1:]
 length = data.shape[0]
+print(cps)
 
 from sklearn.preprocessing import StandardScaler
 # plt.style.use('classic')
@@ -32,13 +40,20 @@ fig, ax = plt.subplots(nrows=4, figsize=(8, 4))
 for i, idx in enumerate(selected_channels):
     channel = channel_set[i]
     # imshow state sequence at the same ax. y range is 0-1
-    ax[i].imshow(state_seq.T, aspect='auto', cmap='tab10', alpha=0.5, extent=[0, length, 0, 1])
-    # plot the former results in the same ax, gray
-    # for k in range(i):
-    #     ax[i, 0].plot(channel_set[k], color='gray', alpha=0.6)
+    # corlor the position of gray_position in gray
+    # the corresponding in state_seq can be calculated by cps[gray_position[i]] to cps[gray_position[i]+1]
+    temp_state_seq = state_seq.copy()
+    for k in range(len(gray_position[i])):
+        temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]] = 10
+    ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.6, cmap='tab10', extent=[0, length, 0, 1])
+        # ax[i].imshow(state_seq[cps[j]:cps[j+1]].T, aspect='auto', cmap='tab10', alpha=0.5, extent=[cps[j], cps[j+1], 0, 1]) 
+    # ax[i].imshow(state_seq.T, aspect='auto', cmap='tab10', alpha=0.5, extent=[0, length, 0, 1])
     ax[i].plot(channel)
     results.append(idx)
-    # ax[i].set_xticks(f'Result set: {results}')
+    string = ', '.join([str(r) for r in selected_channels[:i+1]])
+    title = 'Result set: {'+string+'}, completeness='+str(c[i])
+    # ax[i].set_title(title, fontsize=12, fontweight='bold', color='black', loc='left')
+    ax[i].set_title(title, fontsize=12, color='black', loc='left')
     for cp in cps:
         ax[i].axvline(cp, color='black', linestyle='--')
     ax[i].set_xlim(0, length)
