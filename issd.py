@@ -96,6 +96,10 @@ class ISSD:
             interval = mean_inter - mean_inner
             ts_interval.append(interval)
             indicator_matrices_ = [m>tau for m, tau in zip(ts_matrices, max_inner)]
+            # the following two lines are experimental
+            # remove the above line and uncomment the following two lines
+            # min_inter = np.min(ts_matrices[:,idx_inter], axis=1).flatten()
+            # indicator_matrices_ = [m<tau for m, tau in zip(ts_matrices, min_inter)]
             indicator_matrices_ = np.array(indicator_matrices_, dtype=bool)
             indicator_matrices.append(indicator_matrices_)
         interval = np.array(ts_interval).mean(axis=0)

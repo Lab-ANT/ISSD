@@ -3,15 +3,11 @@ import matplotlib.pyplot as plt
 
 datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']
 
-# completeness = -np.load('completeness_analysis/MoCap_completeness.npy')
-# quality = np.load('completeness_analysis/MoCap_quality.npy')
-
 plt.style.use('classic')
 fig, ax = plt.subplots(figsize=(4, 3.3))
 table = []
 for d in datasets:
     completeness = np.load(f'completeness_analysis/{d}_completeness.npy').T
-    # parts = ax.violinplot(completeness, showmeans=False, showmedians=True, showextrema=False)
     table.append(completeness.flatten())
 parts = ax.violinplot(table, showmeans=False, showmedians=True, showextrema=False)
 # violin setting
