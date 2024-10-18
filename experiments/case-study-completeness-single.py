@@ -2,7 +2,7 @@ import sys
 sys.path.append('.')
 import os
 import numpy as np
-from miniutils import load_data, find_cut_points_from_state_seq, reorder_label, compact_state_seq
+from miniutils import load_data, find_cut_points_from_state_seq, reorder_label, compact_state_seq, reorder_state_seq
 from issd import ISSD
 import matplotlib.pyplot as plt
 import sys
@@ -21,13 +21,14 @@ gray_position = [
     [0,4,7,10],
     [3,4,6,7]
 ]
-state_seq = reorder_label(state_seq)
 
-cps = find_cut_points_from_state_seq(state_seq)[1:]
-# compacted_state_seq = compact(state_seq)
+print(compact_state_seq(state_seq))
+state_seq = reorder_state_seq(state_seq).reshape(-1, 1)
+cps = find_cut_points_from_state_seq(state_seq)
 length = data.shape[0]
+compacted_state_seq = compact_state_seq(state_seq)
+print(compacted_state_seq)
 print(cps)
-# print(compacted_state_seq)
 
 from sklearn.preprocessing import StandardScaler
 # plt.style.use('classic')

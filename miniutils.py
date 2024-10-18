@@ -13,6 +13,7 @@ from sklearn.neighbors import KDTree, BallTree
 import numpy as np
 from scipy.signal import find_peaks
 from sklearn.metrics import confusion_matrix
+from collections import OrderedDict
 
 def is_constant(signal, tolerance=1e-5):
     return np.all(np.abs(np.diff(signal)) < tolerance)
@@ -534,6 +535,15 @@ def compact(series):
             pre = e
             compacted.append(e)
     return compacted
+
+def reorder_state_seq(X):
+    # Start from 0.
+    X = np.array(X).flatten()
+    ordered_label_set = np.array(list(OrderedDict.fromkeys(compact_state_seq(X))))
+    idx_list = [np.argwhere(X==e) for e in ordered_label_set]
+    for i, idx in enumerate(idx_list):
+        X[idx] = i
+    return X.astype(int)
 
 def compact_state_seq(X):
     """
