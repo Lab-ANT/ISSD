@@ -6,9 +6,13 @@ from miniutils import load_data, find_cut_points_from_state_seq, reorder_label, 
 from issd import ISSD
 import matplotlib.pyplot as plt
 import sys
+import matplotlib
 sys.path.append('.')
 
 os.makedirs('completeness_analysis', exist_ok=True)
+
+matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Liberation Sans', ...]
 
 fname = 'data/MoCap/raw/86_08.npy'
 data, state_seq = load_data(fname)
@@ -22,14 +26,13 @@ gray_position = [
     [3,4,6,7]
 ]
 
-print(compact_state_seq(state_seq))
 state_seq = reorder_state_seq(state_seq).reshape(-1, 1)
+# state_seq = reorder_label(state_seq)
 cps = find_cut_points_from_state_seq(state_seq)
 length = data.shape[0]
 compacted_state_seq = compact_state_seq(state_seq)
-print(compacted_state_seq)
-print(cps)
-
+print(len(compacted_state_seq), compacted_state_seq)
+print(len(cps), cps)
 from sklearn.preprocessing import StandardScaler
 # plt.style.use('classic')
 results = []
@@ -42,21 +45,40 @@ channel_set = [channel_set[:, i] for i in range(channel_set.shape[1])]
 fig, ax = plt.subplots(nrows=4, figsize=(8, 4))
 for i, idx in enumerate(selected_channels):
     channel = channel_set[i]
+    # annotate the state index in the first ax
+    if i == 0:
+        for j in range(len(compacted_state_seq)):
+            ax[i].text(cps[j]+50, 
+                       0.8, 
+                       'S '+str(compacted_state_seq[j]), 
+                       fontsize=10,
+                       color='red',
+                       weight='bold',)
     # corlor the position of gray_position in gray
-    temp_state_seq = state_seq.copy()
-    for k in range(len(gray_position[i])):
-        temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]] = 0
-    ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.5, cmap='tab20', extent=[0, length, 0, 1])
+    # temp_state_seq = state_seq.copy()
+    # for k in range(len(gray_position[i])):
+        # temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]] = -1
+        # temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]] = 1
+    # ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.8, cmap='tab10', extent=[0, length, 0, 1])
+
+    # for k in range(len(gray_position[i])):  
+    #     start, end = cps[gray_position[i][k]], cps[gray_position[i][k]+1]  
+    #     rect = plt.Rectangle((start, 0), end-start, 1, facecolor='gray', alpha=0.5)  
+    #     ax[i].add_patch(rect) 
     # for k in range(len(gray_position[i])):
     #     temp_state_seq = state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]]
-    #     ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.5, cmap='tab20', extent=[cps[gray_position[i][k]], cps[gray_position[i][k]+1], 0, 1])
+    #     ax[i].imshow(temp_state_seq.T,
+    #                  aspect='auto',
+    #                  alpha=0.5,
+    #                 #  cmap='tab20',
+    #                  extent=[cps[gray_position[i][k]], cps[gray_position[i][k]+1], 0, 1])
     for k in range(i):
         ax[i].plot(channel_set[k], color='gray', alpha=0.6)
     ax[i].plot(channel)
     results.append(idx)
     string = ', '.join([str(r) for r in selected_channels[:i+1]])
     title = 'Result set: {'+string+'}, completeness='+str(c[i])
-    ax[i].set_title(title, fontsize=12, color='black', loc='left') # fontweight='bold'
+    ax[i].set_title(title, fontsize=12, loc='left') # fontweight='bold'
     for cp in cps[:-1]:
         ax[i].axvline(cp, color='black', linestyle='--')
     ax[i].set_xlim(0, length)
