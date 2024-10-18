@@ -535,6 +535,25 @@ def compact(series):
             compacted.append(e)
     return compacted
 
+def compact_state_seq(X):
+    """
+    This function compacts the state sequence by removing
+    the consecutive repeated labels,
+    e.g., [1,1,1,2,2,1,3,2,2] -> [1,2,1,3,2]
+
+    Parameters
+    ----------
+    X : numpy.ndarray, shape=(n_samples,)
+        The state sequence array.
+    
+    Returns
+    -------
+    numpy.ndarray, shape=(n_samples,)
+        The compacted state sequence array.
+    """
+    X = np.asarray(X).flatten()
+    return X[np.insert(X[1:] != X[:-1], 0, True)]
+
 def state_seq_to_seg_json(state_seq):
     """
     Convert state sequence to json format label.
