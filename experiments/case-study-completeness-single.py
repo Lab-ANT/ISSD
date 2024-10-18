@@ -49,31 +49,20 @@ for i, idx in enumerate(selected_channels):
     if i == 0:
         for j in range(len(compacted_state_seq)):
             ax[i].text(cps[j]+50, 
-                       0.8, 
+                       0.6, 
                        'S '+str(compacted_state_seq[j]), 
                        fontsize=10,
-                       color='red',
+                       color='black',
                        weight='bold',)
     # corlor the position of gray_position in gray
-    # temp_state_seq = state_seq.copy()
-    # for k in range(len(gray_position[i])):
-        # temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]] = -1
-        # temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]] = 1
-    # ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.8, cmap='tab10', extent=[0, length, 0, 1])
+    temp_state_seq = state_seq.copy()
+    ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.8, cmap='tab10', extent=[0, length, 0, 1])
 
-    # for k in range(len(gray_position[i])):  
-    #     start, end = cps[gray_position[i][k]], cps[gray_position[i][k]+1]  
-    #     rect = plt.Rectangle((start, 0), end-start, 1, facecolor='gray', alpha=0.5)  
-    #     ax[i].add_patch(rect) 
-    # for k in range(len(gray_position[i])):
-    #     temp_state_seq = state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]]
-    #     ax[i].imshow(temp_state_seq.T,
-    #                  aspect='auto',
-    #                  alpha=0.5,
-    #                 #  cmap='tab20',
-    #                  extent=[cps[gray_position[i][k]], cps[gray_position[i][k]+1], 0, 1])
-    for k in range(i):
-        ax[i].plot(channel_set[k], color='gray', alpha=0.6)
+    for k in range(len(gray_position[i])):  
+        start, end = cps[gray_position[i][k]], cps[gray_position[i][k]+1]  
+        rect = plt.Rectangle((start, 0), end-start, 1, facecolor='white', alpha=1)  
+        ax[i].add_patch(rect) 
+
     ax[i].plot(channel)
     results.append(idx)
     string = ', '.join([str(r) for r in selected_channels[:i+1]])
@@ -89,6 +78,195 @@ for i, idx in enumerate(selected_channels):
 plt.tight_layout()
 plt.savefig('completeness_analysis/selected_channels.png')
 plt.savefig('completeness_analysis/selected_channels.pdf')
+
+# import sys 
+# sys.path.append('.')
+# import os
+# import numpy as np
+# from miniutils import load_data, find_cut_points_from_state_seq, reorder_label, compact_state_seq, reorder_state_seq
+# from issd import ISSD
+# import matplotlib.pyplot as plt
+# import sys
+# import matplotlib
+# from matplotlib.colors import ListedColormap
+
+# sys.path.append('.')
+
+# os.makedirs('completeness_analysis', exist_ok=True)
+
+# matplotlib.rcParams['font.family'] = 'sans-serif'
+# matplotlib.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Liberation Sans', ...]
+
+# fname = 'data/MoCap/raw/86_08.npy'
+# data, state_seq = load_data(fname)
+# state_seq = state_seq.reshape(-1, 1)
+# selected_channels = [58, 28, 38, 55]
+# c = [268, 278, 284, 284]
+# gray_position = [
+#     [2, 3, 4, 7, 8, 9],
+#     [0, 4, 6, 7, 10],
+#     [0, 4, 7, 10],
+#     [3, 4]
+# ]
+
+# state_seq = reorder_state_seq(state_seq).reshape(-1, 1)
+# cps = find_cut_points_from_state_seq(state_seq)
+# length = data.shape[0]
+# compacted_state_seq = compact_state_seq(state_seq)
+
+# from sklearn.preprocessing import StandardScaler
+
+# results = []
+# channel_set = data[:, selected_channels]
+# channel_set = StandardScaler().fit_transform(channel_set)
+# channel_set = (channel_set - channel_set.min()) / (channel_set.max() - channel_set.min())
+# channel_set = [channel_set[:, i] for i in range(channel_set.shape[1])]
+
+# # Custom colormap: Use gray for -1, and 'tab10' for other states
+# from matplotlib.colors import ListedColormap
+
+# # Convert the tuple to a list
+# cmap_colors = list(plt.cm.tab10.colors)
+# # Add a specific gray color for the -1 value (which represents gray regions)
+# cmap = ListedColormap(['white'] + cmap_colors)
+
+# fig, ax = plt.subplots(nrows=4, figsize=(8, 4))
+# for i, idx in enumerate(selected_channels):
+#     channel = channel_set[i]
+#     # Annotate the state index in the first ax
+#     if i == 0:
+#         for j in range(len(compacted_state_seq)):
+#             ax[i].text(cps[j] + 50,
+#                        0.6,
+#                        'S ' + str(compacted_state_seq[j]),
+#                        fontsize=10,
+#                        color='black',
+#                        weight='bold',)
+
+#     # Create a copy of the state sequence
+#     temp_state_seq = state_seq.copy()
+
+#     # Mark the positions to be gray (-1) in the temporary state sequence
+#     for k in range(len(gray_position[i])):
+#         temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k] + 1]] = -1
+
+#     # Ensure other values are within a valid range (positive integer) for color mapping
+#     temp_state_seq[temp_state_seq >= 0] = temp_state_seq[temp_state_seq >= 0] + 1
+
+#     # Display the state sequence with gray regions
+#     ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.8, cmap=cmap, extent=[0, length, 0, 1])
+
+#     # Plot the channel data
+#     ax[i].plot(channel)
+#     results.append(idx)
+#     string = ', '.join([str(r) for r in selected_channels[:i + 1]])
+#     title = 'Result set: {' + string + '}, completeness=' + str(c[i])
+#     ax[i].set_title(title, fontsize=12, loc='left')
+
+#     # Add vertical lines for cut points
+#     for cp in cps[:-1]:
+#         ax[i].axvline(cp, color='black', linestyle='--')
+
+#     ax[i].set_xlim(0, length)
+
+#     # Remove x ticks for the first 3 axes
+#     if i < len(selected_channels) - 1:
+#         ax[i].set_xticks([])
+
+# plt.tight_layout()
+# plt.savefig('completeness_analysis/selected_channels.png')
+# plt.savefig('completeness_analysis/selected_channels.pdf')
+
+# import sys
+# sys.path.append('.')
+# import os
+# import numpy as np
+# from miniutils import load_data, find_cut_points_from_state_seq, reorder_label, compact_state_seq, reorder_state_seq
+# from issd import ISSD
+# import matplotlib.pyplot as plt
+# import sys
+# import matplotlib
+# sys.path.append('.')
+
+# os.makedirs('completeness_analysis', exist_ok=True)
+
+# matplotlib.rcParams['font.family'] = 'sans-serif'
+# matplotlib.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Liberation Sans', ...]
+
+# fname = 'data/MoCap/raw/86_08.npy'
+# data, state_seq = load_data(fname)
+# state_seq = state_seq.reshape(-1, 1)
+# selected_channels = [58, 28, 38, 55]
+# c = [268, 278, 284, 284]
+# gray_position = [
+#     [2,3,4,7,8,9],
+#     [0,4,6,7,10],
+#     [0,4,7,10],
+#     [3,4,6,7]
+# ]
+
+# state_seq = reorder_state_seq(state_seq).reshape(-1, 1)
+# # state_seq = reorder_label(state_seq)
+# cps = find_cut_points_from_state_seq(state_seq)
+# length = data.shape[0]
+# compacted_state_seq = compact_state_seq(state_seq)
+# print(len(compacted_state_seq), compacted_state_seq)
+# print(len(cps), cps)
+# from sklearn.preprocessing import StandardScaler
+# # plt.style.use('classic')
+# results = []
+# channel_set = data[:, selected_channels]
+# channel_set = StandardScaler().fit_transform(channel_set)
+# # # scale to 0-1
+# channel_set = (channel_set - channel_set.min()) / (channel_set.max() - channel_set.min())
+# channel_set = [channel_set[:, i] for i in range(channel_set.shape[1])]
+
+# fig, ax = plt.subplots(nrows=4, figsize=(8, 4))
+# for i, idx in enumerate(selected_channels):
+#     channel = channel_set[i]
+#     # annotate the state index in the first ax
+#     if i == 0:
+#         for j in range(len(compacted_state_seq)):
+#             ax[i].text(cps[j]+50, 
+#                        0.8, 
+#                        'S '+str(compacted_state_seq[j]), 
+#                        fontsize=10,
+#                        color='red',
+#                        weight='bold',)
+#     # corlor the position of gray_position in gray
+#     temp_state_seq = state_seq.copy()
+#     for k in range(len(gray_position[i])):
+#         temp_state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]] = -1
+#     ax[i].imshow(temp_state_seq.T, aspect='auto', alpha=0.8, cmap='tab10', extent=[0, length, 0, 1])
+
+#     # for k in range(len(gray_position[i])):  
+#     #     start, end = cps[gray_position[i][k]], cps[gray_position[i][k]+1]  
+#     #     rect = plt.Rectangle((start, 0), end-start, 1, facecolor='gray', alpha=0.5)  
+#     #     ax[i].add_patch(rect) 
+#     # for k in range(len(gray_position[i])):
+#     #     temp_state_seq = state_seq[cps[gray_position[i][k]]:cps[gray_position[i][k]+1]]
+#     #     ax[i].imshow(temp_state_seq.T,
+#     #                  aspect='auto',
+#     #                  alpha=0.5,
+#     #                 #  cmap='tab20',
+#     #                  extent=[cps[gray_position[i][k]], cps[gray_position[i][k]+1], 0, 1])
+#     # for k in range(i):
+#     #     ax[i].plot(channel_set[k], color='gray', alpha=0.6)
+#     ax[i].plot(channel)
+#     results.append(idx)
+#     string = ', '.join([str(r) for r in selected_channels[:i+1]])
+#     title = 'Result set: {'+string+'}, completeness='+str(c[i])
+#     ax[i].set_title(title, fontsize=12, loc='left') # fontweight='bold'
+#     for cp in cps[:-1]:
+#         ax[i].axvline(cp, color='black', linestyle='--')
+#     ax[i].set_xlim(0, length)
+#     # remove x ticks for the first 3 ax
+#     if i < len(selected_channels)-1:
+#         ax[i].set_xticks([])
+
+# plt.tight_layout()
+# plt.savefig('completeness_analysis/selected_channels.png')
+# plt.savefig('completeness_analysis/selected_channels.pdf')
 
 # import sys
 # sys.path.append('.')
