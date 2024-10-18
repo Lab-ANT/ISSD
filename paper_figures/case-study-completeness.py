@@ -6,6 +6,7 @@ Plot MoCap
 """
 completeness = np.load('completeness_analysis/MoCap_completeness.npy')
 quality = np.load('completeness_analysis/MoCap_quality.npy')
+iter_data = np.load('completeness_analysis/MoCap_iter.npy')
 # scale to 0-1
 quality = (quality - quality.min()) / (quality.max() - quality.min())
 
@@ -35,7 +36,8 @@ ax.tick_params(axis='x', labelsize=8)
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 divider = make_axes_locatable(ax)
 cax_divider = divider.append_axes("right", size="8%", pad=0.1)
-new_im = cax_divider.pcolor(completeness[:,selected_channels], cmap='viridis', edgecolors='k', linewidths=0.5)
+# new_im = cax_divider.pcolor(completeness[:,selected_channels], cmap='viridis', edgecolors='k', linewidths=0.5)
+new_im = cax_divider.pcolor(iter_data, cmap='viridis', edgecolors='k', linewidths=0.5)
 # close x and y ticks
 cax_divider.set_yticks([])
 cax_divider.set_xticks([])

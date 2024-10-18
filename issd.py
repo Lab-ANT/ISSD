@@ -125,10 +125,10 @@ class ISSD:
             current_matrix = matrix_OR(indicator_matrices[selected_channels_cf])
             # the following line is for case-study-completeness.py
             # not used in the normal process
-            # mean_quality = np.sum(interval[selected_channels_cf])/len(selected_channels_cf)
-            mean_quality = np.sum(interval[selected_channels_cf])
+            mean_quality = np.sum(interval[selected_channels_cf])/len(selected_channels_cf)
+            # mean_quality = np.sum(interval[selected_channels_cf])
             # print(idx, np.sum(current_matrix), mean_quality)
-            self.indicator_matrices.append(current_matrix)
+            # self.indicator_matrices.append(current_matrix)
         # self.indicator_matrices = indicator_matrices
 
         self.cf_solution = selected_channels_cf
