@@ -127,7 +127,7 @@ class ISSD:
             # not used in the normal process
             # mean_quality = np.sum(interval[selected_channels_cf])/len(selected_channels_cf)
             mean_quality = np.sum(interval[selected_channels_cf])
-            print(idx, np.sum(current_matrix), mean_quality)
+            # print(idx, np.sum(current_matrix), mean_quality)
             self.indicator_matrices.append(current_matrix)
         # self.indicator_matrices = indicator_matrices
 

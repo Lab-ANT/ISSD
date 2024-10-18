@@ -34,11 +34,6 @@ ax.tick_params(axis='x', labelsize=8)
 # Adding a colorbar and manually adjusting to match the height exactly
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 divider = make_axes_locatable(ax)
-cax_divider = divider.append_axes("right", size="8%", pad=0.1)
-new_im = cax_divider.pcolor(completeness[:,selected_channels], cmap='viridis', edgecolors='k', linewidths=0.5)
-# close x and y ticks
-cax_divider.set_yticks([])
-cax_divider.set_xticks([])
 cax_divider = divider.append_axes("right", size="2%", pad=0.1)
 
 # Adding the colorbar to the side plot and setting the label
@@ -77,11 +72,6 @@ ax.tick_params(axis='x', labelsize=8)
 # Adding a colorbar and manually adjusting to match the height exactly
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 divider = make_axes_locatable(ax)
-cax_divider = divider.append_axes("right", size="8%", pad=0.1)
-new_im = cax_divider.pcolor(quality[:,selected_channels], cmap='viridis', edgecolors='k', linewidths=0.5)
-# close x and y ticks
-cax_divider.set_yticks([])
-cax_divider.set_xticks([])
 cax_divider = divider.append_axes("right", size="2%", pad=0.1)
 
 # Adding the colorbar to the side plot and setting the label

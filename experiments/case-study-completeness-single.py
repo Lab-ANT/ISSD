@@ -48,7 +48,7 @@ for i, idx in enumerate(selected_channels):
     # annotate the state index in the first ax
     if i == 0:
         for j in range(len(compacted_state_seq)):
-            ax[i].text(cps[j]+50, 
+            ax[i].text(cps[j]+100, 
                        0.6, 
                        'S '+str(compacted_state_seq[j]), 
                        fontsize=10,
