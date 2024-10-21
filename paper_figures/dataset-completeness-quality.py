@@ -15,10 +15,14 @@ for pc in parts['bodies']:
     pc.set_facecolor('skyblue')
     pc.set_edgecolor('skyblue')
     pc.set_alpha(1)
-box = ax.boxplot(table, widths=0.25, patch_artist=True, whis=[0,95])
+# box = ax.boxplot(table, widths=0.25, patch_artist=True, whis=[0,95])
+# if want to set the marker of outliers, use the following code
+box = ax.boxplot(table, widths=0.25, patch_artist=True, whis=[0,95],
+                 flierprops=dict(marker='o', markersize=2, markerfacecolor='black'))
 ax.set_xticks(np.arange(1, len(datasets)+1))
 ax.set_xticklabels(datasets, rotation=15, fontsize=10)
 ax.set_ylabel('Completeness')
+ax.set_ylim(-0.005, 1)
 plt.subplots_adjust(left=0.15)
 plt.savefig('completeness_analysis/fig_completeness_box.png')
 plt.savefig('completeness_analysis/fig_completeness_box.pdf')

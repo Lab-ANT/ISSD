@@ -26,8 +26,11 @@ for d in datasets:
     selector.compute_matrices(datalist, state_seq_list)
     selector.compute_completeness_quality()
     selector.get_cf_solution(4)
+    selector.get_qf_solution(4)
+    selector.inte_solution()
     cf_solution = selector.cf_solution
     print(cf_solution)
+    print(selector.solution)
     matrices = selector.matrices
     true_matrices = selector.true_matrices
     ts_ch = []
