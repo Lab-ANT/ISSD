@@ -17,7 +17,7 @@ matplotlib.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Liberation Sa
 fname = 'data/MoCap/raw/86_08.npy'
 data, state_seq = load_data(fname)
 state_seq = state_seq.reshape(-1, 1)
-selected_channels = [58, 28, 38, 55]
+# selected_channels = [58, 28, 38, 55]
 c = [268, 278, 284, 284]
 gray_position = [
     [2,3,4,7,8,9],

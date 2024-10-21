@@ -14,6 +14,8 @@ for d in datasets:
     # Select on multiple time series
     fname_list = os.listdir(f'data/{d}/raw')
     fname_list.sort()
+    # fname_list = fname_list[len(fname_list)//2:]
+    # fname_list = fname_list[:len(fname_list)//2]
     datalist = []
     state_seq_list = []
     for fname in fname_list:
@@ -25,6 +27,7 @@ for d in datasets:
     selector.compute_completeness_quality()
     selector.get_cf_solution(4)
     cf_solution = selector.cf_solution
+    print(cf_solution)
     matrices = selector.matrices
     true_matrices = selector.true_matrices
     ts_ch = []
@@ -42,7 +45,7 @@ for d in datasets:
             ch_indicator.append(indicator_matrix)
         theoritical_highest_list.append(len(idx_inter))
         ch_indicator = np.stack(ch_indicator, axis=0)
-        print(ch_indicator.shape)
+        # print(ch_indicator.shape)
         ts_ch.append(ch_indicator)
     print(theoritical_highest_list)
     ts_completeness = []
