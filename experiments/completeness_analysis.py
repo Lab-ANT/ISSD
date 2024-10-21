@@ -5,8 +5,7 @@ import numpy as np
 from miniutils import *
 from issd import ISSD
 
-# datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']
-datasets = ['MoCap']
+datasets = ['MoCap', 'ActRecTut', 'PAMAP2', 'USC-HAD', 'SynSeg']
 
 os.makedirs('completeness_analysis', exist_ok=True)
 
@@ -60,6 +59,11 @@ for d in datasets:
             iter_list.append(c)
         ts_completeness.append(iter_list)
     ts_completeness = np.array(ts_completeness)
+    # calculate dataset highest completeness
+    dataset_highest = []
+    for ts_idx, ch_indicator in enumerate(ts_ch):
+        dataset_highest.append(np.sum(matrix_OR(ch_indicator))/theoritical_highest_list[ts_idx])
+    print(dataset_highest)
     # print(ts_completeness.shape)
     np.save(f'completeness_analysis/{d}_iter.npy', ts_completeness)
     np.save(f'completeness_analysis/{d}_completeness.npy', selector.completeness)
