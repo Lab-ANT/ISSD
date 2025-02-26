@@ -1,0 +1,1 @@
+./src/autoplait output/MoCap/issd/dat1/input output/MoCap/issd/dat1/
