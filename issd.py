@@ -124,7 +124,7 @@ class ISSD:
             masked_idx[self.clusters==self.clusters[idx]] = True
             current_matrix = matrix_OR(indicator_matrices[selected_channels_cf])
             # the following line is for case-study-completeness.py
-            print(idx, np.sum(current_matrix))
+            # print(idx, np.sum(current_matrix))
             # not used in the normal process
             # mean_quality = np.sum(interval[selected_channels_cf])/len(selected_channels_cf)
             # mean_quality = np.sum(interval[selected_channels_cf])
