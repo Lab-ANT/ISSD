@@ -19,7 +19,7 @@ pip install -r requirements/selection.txt
 # use other source as needed, e.g., -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # downstream environment
-conda create -n selection python=3.9.21
+conda create -n downstream python=3.9.21
 conda activate downstream
 pip install -r requirements/downstream.txt
 # use other source as needed, e.g., -i https://pypi.tuna.tsinghua.edu.cn/simple
